@@ -1,0 +1,65 @@
+{
+  "_from": "fortnitenode@0.1.0",
+  "_id": "fortnitenode@0.1.0",
+  "_inBundle": false,
+  "_integrity": "sha512-QOuxus+Mc2qrDvpRJehi5mAusuraSQfvlc6B4s1gQnnXdJGo45ZCUJrkmEVvfzmdr6XZ3PTTHFb792JO42hXJQ==",
+  "_location": "/fortnitenode",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "fortnitenode@0.1.0",
+    "name": "fortnitenode",
+    "escapedName": "fortnitenode",
+    "rawSpec": "0.1.0",
+    "saveSpec": null,
+    "fetchSpec": "0.1.0"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/fortnitenode/-/fortnitenode-0.1.0.tgz",
+  "_shasum": "0cfd7c3240b526306de2d32570118aba987364e6",
+  "_spec": "fortnitenode@0.1.0",
+  "_where": "C:\\Users\\Dominick\\Desktop\\FNTR Queue 2",
+  "author": {
+    "name": "teenari"
+  },
+  "bugs": {
+    "url": "https://github.com/Teenari/fortnitenode/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "crypto-js": "^4.0.0",
+    "fs": "0.0.2",
+    "name-that-color": "^0.1.0",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.4",
+    "snyk": "^1.316.1",
+    "stanza": "^12.5.0",
+    "uuid": "^7.0.2"
+  },
+  "deprecated": false,
+  "description": "A llibrary to complete available or unavailable actions to a normal account in Fortnite.",
+  "homepage": "https://github.com/Teenari/fortnitenode#readme",
+  "keywords": [
+    "Fortnitejs",
+    "fortnitejavascript",
+    "fortnitenode",
+    "fortnitenodejs",
+    "fortnite",
+    "api"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "fortnitenode",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Teenari/fortnitenode.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: This cannot be accessed by command prompt.\" && exit 1"
+  },
+  "version": "0.1.0"
+}

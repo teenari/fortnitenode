@@ -1,0 +1,1 @@
+Pull requests would be fine, currently I'm maintaining the library, so any pull requests will be nice.
