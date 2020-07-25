@@ -6,11 +6,15 @@ module.exports = Object.freeze({
 
   CHANNEL: "https://channels-public-service-prod.ol.epicgames.com/api",
 
+  PAYMENTPCI: "https://payment-website-pci.ol.epicgames.com",
+
   ACCOUNTSERVICE: "https://account-public-service-prod03.ol.epicgames.com/account/api",
 
   FRIENDSERVICE: "https://friends-public-service-prod06.ol.epicgames.com/friends/api",
 
   FORTNITE: "https://fortnite-public-service-prod11.ol.epicgames.com/fortnite/api",
+  
+  FORTNITECONTENT: "https://fortnitecontent-website-prod07.ol.epicgames.com/content/api/",
 
   FRIENDS: "https://friends-public-service-prod.ol.epicgames.com/friends/api",
 

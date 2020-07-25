@@ -1,50 +1,74 @@
 # MUC
+Page is automated, contact me if theres something wrong.
 This class has 7 functions!
 
 [To use this make sure you read the Usage md.](https://stoplight.io/p/docs/gh/teenari/fortnitenode/docs/Usage.md?srn=gh/teenari/fortnitenode/docs/Usage.md&group=master)
 
 ## Properties
-*Due to some bugs using my auto docs, I have to tell you to `console.log` this class or look at the file, thank you for your understanding.*
+- launcher
+- stream
+- launcher
+- stanza
+- config - Object
 
 ## Methods
 
 ## send(data)
-No information about this function, contact me to update function `send`.
+Send a message to the muc room.
+
+### Comments
+> param {String} data Something to send to the muc.
 
 ### Arguments
-- data
+- `data` - Something to send to the muc.
 
 ## sendData(data)
-No information about this function, contact me to update function `sendData`.
+No comments on this function, contact me to update function `sendData`'s comments on the library.
 
 ### Arguments
-- data
+- `data`
 
 ## leave(room)
-No information about this function, contact me to update function `leave`.
+Leave the current or room.
+
+### Comments
+> param {String} room A room. (NOT REQUIRED)
 
 ### Arguments
-- room
+- `room` - A room. (NOT REQUIRED)
 
 ## events()
-No information about this function, contact me to update function `events`.
+Trigger events.
 
 ## join(room)
-No information about this function, contact me to update function `join`.
+Join a room.
+
+### Comments
+> param {String} room A room.
 
 ### Arguments
-- room
+- `room` - A room.
 
 ## ban(nick, reason)
-No information about this function, contact me to update function `ban`.
+Ban a person from the room.
+
+### Comments
+> param {String} nick The person's nick.
+
+> param {String} reason A reason.
 
 ### Arguments
-- nick
-- reason
+- `nick` - The person's nick.
+- `reason` - A reason.
 
 ## kick(nick, reason)
-No information about this function, contact me to update function `kick`.
+Kick a person from the room.
+
+### Comments
+> param {String} nick The person's nick.
+
+> param {String} reason A reson.
 
 ### Arguments
-- nick
-- reason
+- `nick` - The person's nick.
+- `reason` - A reson.

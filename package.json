@@ -1,28 +1,27 @@
 {
-  "_from": "fortnitenode@0.1.0",
-  "_id": "fortnitenode@0.1.0",
+  "_from": "fortnitenode",
+  "_id": "fortnitenode@0.5.0",
   "_inBundle": false,
-  "_integrity": "sha512-QOuxus+Mc2qrDvpRJehi5mAusuraSQfvlc6B4s1gQnnXdJGo45ZCUJrkmEVvfzmdr6XZ3PTTHFb792JO42hXJQ==",
+  "_integrity": "sha512-+ErDAs0GLoNJm86hCke7EKG3cwYwAx/7t5SuJ/aCGhpm5Op4GjvODtPnPWq/tuEUk0a0fyV5Eu5IkG6KsDaQaA==",
   "_location": "/fortnitenode",
   "_phantomChildren": {},
   "_requested": {
-    "type": "version",
+    "type": "tag",
     "registry": true,
-    "raw": "fortnitenode@0.1.0",
+    "raw": "fortnitenode",
     "name": "fortnitenode",
     "escapedName": "fortnitenode",
-    "rawSpec": "0.1.0",
+    "rawSpec": "",
     "saveSpec": null,
-    "fetchSpec": "0.1.0"
+    "fetchSpec": "latest"
   },
   "_requiredBy": [
     "#USER",
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/fortnitenode/-/fortnitenode-0.1.0.tgz",
-  "_shasum": "0cfd7c3240b526306de2d32570118aba987364e6",
-  "_spec": "fortnitenode@0.1.0",
-  "_where": "C:\\Users\\Dominick\\Desktop\\FNTR Queue 2",
+  "_resolved": "https://registry.npmjs.org/fortnitenode/-/fortnitenode-0.5.0.tgz",
+  "_shasum": "20f1cd6a7414d7261b8c2483db9ae3872c0b76c9",
+  "_spec": "fortnitenode",
   "author": {
     "name": "teenari"
   },
@@ -31,7 +30,6 @@
   },
   "bundleDependencies": false,
   "dependencies": {
-    "crypto-js": "^4.0.0",
     "fs": "0.0.2",
     "name-that-color": "^0.1.0",
     "request": "^2.88.2",
@@ -61,5 +59,5 @@
   "scripts": {
     "test": "echo \"Error: This cannot be accessed by command prompt.\" && exit 1"
   },
-  "version": "0.1.0"
+  "version": "0.5.0"
 }

@@ -7,10 +7,14 @@ const StoreParser = require("fortnitenode/src/Fortnite/Parsers/StoreParser");
 const StatsParser = require("fortnitenode/src/Fortnite/Parsers/StatsParser");
 const Endpoints = require("fortnitenode/resources/Endpoints");
 const { v4: uuid } = require('uuid');
+const Platforms = require('fortnitenode/enums/Platforms');
+const Privacy = require('fortnitenode/enums/PrivacySettings');
 
 class Fortnite {
     constructor(data) {
         this.launcher = new Launcher(data);
+        if(typeof this.launcher.config.settings.platform === 'string') this.launcher.config.settings.platform = Platforms[this.launcher.config.settings.platform] || Platforms.WINDOWS;
+        if(typeof this.launcher.config.settings.config === 'string') this.launcher.config.settings.config = Privacy[this.launcher.config.settings.platform] || Privacy.Public;
         this.party = Party;
         this.Authorization = null;
         this.stream = null;
@@ -22,67 +26,16 @@ class Fortnite {
     /**
      * Checks if fortnite is bought.
      */
-    async checkHasFortnite() {
-        try {
-            
-            if(!this.launcher.account.entitlements.find(entitlement => entitlement.namespace == 'fn')) {
-                this.launcher.debugger.error('Launcher', 'Purchase fortnite to use fortnitenode.');
-            }
-
-            const data = await this.launcher.informEULA('fn'); 
-            if(data) {
-                if(!await this.launcher.receiveEULA(data)) this.launcher.debugger.error('Launcher', `Cannot post fortnite's eula.`);
-            }
-            return true;
+    async checkHasFortnite() {            
+        if(!this.launcher.account.entitlements.find(entitlement => entitlement.namespace == 'fn')) {
+            this.launcher.debugger.error('Launcher', 'Purchase fortnite to use fortnitenode.');
         }
-        catch(error) {
-            this.launcher.debugger.error('Launcher', error.code);
-        }
-    }
 
-    /**
-     * coming
-     */
-    async vivox() {
-        throw new Error('Coming in a few months or years :O.');
-        // const vivoxUrl = 'https://fnwp.www.vivox.com/api2';
-        // const { data: { token: loginToken } } = await this.Request.sendRequest(
-        //     `${Endpoints.FORTNITE}/game/v2/voice/${this.launcher.account.id}/createLoginToken`,
-        //     "POST",
-        //     this.Authorization.fullToken
-        // )
-        // const { data: xml } = await this.Request.sendRequest(
-        //     `${vivoxUrl}/viv_signin.php`,
-        //     "POST",
-        //     null,
-        //     {
-        //         access_token: loginToken,
-        //         displayname: `.Fortnite.${this.launcher.account.id}.`,
-        //         userid: `.Fortnite.${this.launcher.account.id}.`,
-        //         user_app: 'SApi',
-        //         pwd: 'foo',
-        //         send_sip_creds: 1
-        //     },
-        //     true,
-        //     {
-        //         'Content-Type': "application/x-www-form-urlencoded"
-        //     }
-        // )
-        // const { data: { providers: { vivox } } } = await this.Request.sendRequest(
-        //     `${Endpoints.PARTY}/v1/Fortnite/parties/${this.party.id}/members/${this.launcher.account.id}/conferences/connection`,
-        //     "POST",
-        //     this.Authorization.fullToken,
-        //     {
-        //         providers: {
-        //             vivox: {}
-        //         }
-        //     },
-        // );
-        // const authorization_token = vivox.authorization_token;
-        // const channel_uri = vivox.channel_uri;
-        // const user_uri = vivox.user_uri;
-        // const authToken = xml.split('<auth_token>')[1].split('<')[0];
-        // await this.me.setVoiceChatStatus('PartyVoice');
+        const data = await this.launcher.informEULA('fn'); 
+        if(data) {
+            if(!await this.launcher.receiveEULA(data)) this.launcher.debugger.error('Launcher', `Cannot post fortnite's eula.`);
+        }
+        return true;
     }
 
     /**
@@ -92,21 +45,12 @@ class Fortnite {
     async init() {
         this.launcher.debugger.debug('Fortnite', 'Login progress started.');
 
-        let auth;
-
-        if(this.launcher.data.credentials.deviceAuth) {
-            this.launcher.debugger.debug('Fortnite', '`device` is being used to login.');
-            auth = await this.launcher.oauthWithDevice(this.launcher.data.credentials.deviceAuth);
-            auth = await this.launcher.ouath(await this.launcher.getExchangeOauth(`${auth.token_type} ${auth.access_token}`), "ZWM2ODRiOGM2ODdmNDc5ZmFkZWEzY2IyYWQ4M2Y1YzY6ZTFmMzFjMjExZjI4NDEzMTg2MjYyZDM3YTEzZmM4NGQ=");
-        }
         await this.launcher.login();
+        const exchangeCode = await this.launcher.getExchangeOauth();
+        this.launcher.debugger.debug('Fortnite', '`exchangeCode` has been gotten.');
+        const auth = await this.launcher.oauth({ exchange_code: exchangeCode, grant_type: 'exchange_code' }, "ZWM2ODRiOGM2ODdmNDc5ZmFkZWEzY2IyYWQ4M2Y1YzY6ZTFmMzFjMjExZjI4NDEzMTg2MjYyZDM3YTEzZmM4NGQ=", true);
+        this.launcher.debugger.debug('Fortnite', 'Authorization has been gotten.');
 
-        if(!auth) {
-            const exchangeCode = await this.launcher.getExchangeOauth();
-            this.launcher.debugger.debug('Fortnite', '`exchangeCode` has been gotten.');
-            auth = await this.launcher.ouath(exchangeCode, "ZWM2ODRiOGM2ODdmNDc5ZmFkZWEzY2IyYWQ4M2Y1YzY6ZTFmMzFjMjExZjI4NDEzMTg2MjYyZDM3YTEzZmM4NGQ=");
-            this.launcher.debugger.debug('Fortnite', 'Authorization has been gotten.');
-        }
         this.Authorization = {
             fullToken: `${auth.token_type} ${auth.access_token}`,
             ...auth,
@@ -116,7 +60,7 @@ class Fortnite {
 
         this.stream = new Stream(this, {
             type: "Fortnite",
-            resource: `V2:Fortnite:${this.launcher.data.settings.platform.plat}::${uuid().replace(/-/g, "").toUpperCase()}`,
+            resource: `V2:Fortnite:${this.launcher.config.settings.platform.plat}::${uuid().replace(/-/g, "").toUpperCase()}`,
             prod: 'prod.ol.epicgames.com',
             service: 'xmpp-service-prod.ol.epicgames.com',
             credentials: {
@@ -129,26 +73,26 @@ class Fortnite {
 
         this.party = new this.party(this, {
             meta: {
-                "urn:epic:cfg:accepting-members_b": this.launcher.data.settings.config.acceptingMembers,
+                "urn:epic:cfg:accepting-members_b": this.launcher.config.settings.config.acceptingMembers,
                 "urn:epic:cfg:build-id_s": "1:1:",
-                "urn:epic:cfg:chat-enabled_b": this.launcher.data.settings.chatEnabled,
-                "urn:epic:cfg:invite-perm_s": this.launcher.data.settings.config.invitePermission,
-                "urn:epic:cfg:join-request-action_s": this.launcher.data.settings.joinConfirmation === false ? "AutoApprove" : "Manual",
-                "urn:epic:cfg:party-type-id_s": this.launcher.data.settings.type,
-                "urn:epic:cfg:presence-perm_s": this.launcher.data.settings.config.presencePermission,
-                "urn:epic:conn:platform_s": this.launcher.data.settings.platform.plat,
+                "urn:epic:cfg:chat-enabled_b": this.launcher.config.settings.chatEnabled,
+                "urn:epic:cfg:invite-perm_s": this.launcher.config.settings.config.invitePermission,
+                "urn:epic:cfg:join-request-action_s": this.launcher.config.settings.joinConfirmation === false ? "AutoApprove" : "Manual",
+                "urn:epic:cfg:party-type-id_s": this.launcher.config.settings.type,
+                "urn:epic:cfg:presence-perm_s": this.launcher.config.settings.config.presencePermission,
+                "urn:epic:conn:platform_s": this.launcher.config.settings.platform.plat,
                 "urn:epic:conn:type_s": "game",
             },
             members: [],
             config: {
                 discoverability: "ALL",
-                invite_ttl: this.launcher.data.settings.inviteTTL,
-                join_confirmation: this.launcher.data.settings.joinConfirmation,
-                joinability: this.launcher.data.settings.joinability,
-                max_size: this.launcher.data.settings.maxSize,
-                sub_type: this.launcher.data.settings.subType,
-                type: this.launcher.data.settings.type,
-                chatEnabled: this.launcher.data.settings.chatEnabled,
+                invite_ttl: this.launcher.config.settings.inviteTTL,
+                join_confirmation: this.launcher.config.settings.joinConfirmation,
+                joinability: this.launcher.config.settings.joinability,
+                max_size: this.launcher.config.settings.maxSize,
+                sub_type: this.launcher.config.settings.subType,
+                type: this.launcher.config.settings.type,
+                chatEnabled: this.launcher.config.settings.chatEnabled,
             },
         });
         await this.party.create(this.party);
@@ -197,7 +141,7 @@ class Fortnite {
             );
             return data.results;
         } catch(error) {
-            this.launcher.debugger.error('Launcher', error.code);
+            this.launcher.debugger.error('Launcher', error);
         }
     }
 
@@ -218,7 +162,7 @@ class Fortnite {
             );
             return response.statusCode === 204;
         } catch(error) {
-            this.launcher.debugger.error('Launcher', error.code);
+            this.launcher.debugger.error('Launcher', error);
         }
     }
 
@@ -239,7 +183,7 @@ class Fortnite {
             );
             return response.statusCode === 204;
         } catch(error) {
-            this.launcher.debugger.error('Launcher', error.code);
+            this.launcher.debugger.error('Launcher', error);
         }
     }
 
@@ -260,7 +204,7 @@ class Fortnite {
             );
             return data.results[0];
         } catch(error) {
-            this.launcher.debugger.error('Launcher', error.code);
+            this.launcher.debugger.error('Launcher', error);
         }
     }
 
@@ -329,7 +273,7 @@ class Fortnite {
             )
             return data;
         } catch(error) {
-            this.launcher.debugger.error('Launcher', error.code);
+            this.launcher.debugger.error('Launcher', error);
         }
     }
 
@@ -361,7 +305,7 @@ class Fortnite {
             )
             return new StatsParser(data.stats).parse();
         } catch(error) {
-            this.launcher.debugger.error('Launcher', error.code);
+            this.launcher.debugger.error('Launcher', error);
         }
     }
 
@@ -384,7 +328,7 @@ class Fortnite {
             )
             return data;
         } catch(error) {
-            this.launcher.debugger.error('Launcher', error.code);
+            this.launcher.debugger.error('Launcher', error);
         }
     }
 
@@ -405,7 +349,7 @@ class Fortnite {
             )
             return data;
         } catch(error) {
-            this.launcher.debugger.error('Launcher', error.code);
+            this.launcher.debugger.error('Launcher', error);
         }
     }
 
@@ -426,7 +370,7 @@ class Fortnite {
             )
             return new StoreParser(data).parse();
         } catch(error) {
-            this.launcher.debugger.error('Launcher', error.code);
+            this.launcher.debugger.error('Launcher', error);
         }
     }
 
@@ -447,7 +391,7 @@ class Fortnite {
             )
             return data;
         } catch(error) {
-            this.launcher.debugger.error('Launcher', error.code);
+            this.launcher.debugger.error('Launcher', error);
         }
     }
 
@@ -468,7 +412,7 @@ class Fortnite {
             )
             return data;
         } catch(error) {
-            this.launcher.debugger.error('Launcher', error.code);
+            this.launcher.debugger.error('Launcher', error);
         }
     }
 
@@ -479,7 +423,7 @@ class Fortnite {
     async getPages() {
         try {
             const { data } = await this.Request.sendRequest(
-                `https://fortnitecontent-website-prod07.ol.epicgames.com/content/api/pages/fortnite-game`,
+                `${Endpoints.FORTNITECONTENT}/pages/fortnite-game`,
                 "GET",
                 this.Authorization.fullToken,
                 null,
@@ -489,7 +433,7 @@ class Fortnite {
             )
             return data;
         } catch(error) {
-            this.launcher.debugger.error('Launcher', error.code);
+            this.launcher.debugger.error('Launcher', error);
         }
     }
 
@@ -517,7 +461,7 @@ class Fortnite {
             )
             return data;
         } catch(error) {
-            this.launcher.debugger.error('Launcher', error.code);
+            this.launcher.debugger.error('Launcher', error);
         }
     }
 
@@ -534,7 +478,7 @@ class Fortnite {
             this.clients[data.custom_message] = fortnite;
             return this.clients[data.custom_message];
         } catch(error) {
-            this.launcher.debugger.error('Launcher', error.code);
+            this.launcher.debugger.error('Launcher', error);
         }
     }
 
@@ -666,7 +610,7 @@ class Fortnite {
     async removeNote(account) {
         const friend = await this.launcher.getAccount(account);
         const { response } = await this.Request.sendRequest(
-          `https://friends-public-service-prod.ol.epicgames.com/friends/api/v1/${this.launcher.account.id}/friends/${friend.id}/note`,
+          `${Endpoints.FRIENDS}/v1/${this.launcher.account.id}/friends/${friend.id}/note`,
           `DELETE`,
           this.Authorization.fullToken,
         );
@@ -681,7 +625,7 @@ class Fortnite {
     async removeAlias(account) {
         const friend = await this.launcher.getAccount(account);
         const { response } = await this.Request.sendRequest(
-          `https://friends-public-service-prod.ol.epicgames.com/friends/api/v1/${this.launcher.account.id}/friends/${friend.id}/alias`,
+          `${Endpoints.FRIENDS}/v1/${this.launcher.account.id}/friends/${friend.id}/alias`,
           `DELETE`,
           this.Authorization.fullToken,
         );

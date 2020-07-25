@@ -21,7 +21,7 @@ class Invite {
      */
     async decline() {
         await this.fortnite.Request.sendRequest(
-            `${Endpoints.PARTY}/v1/Fortnite/parties/${this.party.id}/invites/${this.launcher.account.id}/decline`,
+            `${Endpoints.PARTY}/v1/Fortnite/parties/${this.party.id}/invites/${this.pinger_id}/decline`,
             "POST",
             this.fortnite.Authorization.fullToken,
             null,
@@ -29,6 +29,7 @@ class Invite {
             null,
             true,
         );
+        await this.fortnite.party.deleteInvite(this.party.id, this.pinger_id);
         return true;
     }
 

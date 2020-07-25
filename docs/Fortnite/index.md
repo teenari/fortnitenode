@@ -1,18 +1,22 @@
 # Fortnite
-This class has 30 functions!
+Page is automated, contact me if theres something wrong.
+This class has 29 functions!
 
 [To use this make sure you read the Usage md.](https://stoplight.io/p/docs/gh/teenari/fortnitenode/docs/Usage.md?srn=gh/teenari/fortnitenode/docs/Usage.md&group=master)
 
 ## Properties
-*Due to some bugs using my auto docs, I have to tell you to `console.log` this class or look at the file, thank you for your understanding.*
+- launcher - Class `Launcher`
+- party
+- Authorization
+- stream
+- Request - Class `Request`
+- clients - Object
+- mcp
 
 ## Methods
 
 ## checkHasFortnite()
 Checks if fortnite is bought.
-
-## vivox()
-coming
 
 ## init()
 Inits, logins in and logins into fortnite, setups stream, and creates a party.
@@ -39,7 +43,7 @@ Get all favorite islands.
 > param {Date} olderThan ISO 8601 Date
 
 ### Arguments
-- olderThan - ISO 8601 Date
+- `olderThan` - ISO 8601 Date
 
 ## favoriteIsland(islandId)
 Add a favorite island.
@@ -48,7 +52,7 @@ Add a favorite island.
 > param {IslandCode} islandId 
 
 ### Arguments
-- islandId
+- `islandId`
 
 ## unfavoriteIsland(islandId)
 Unfavorite a island.
@@ -57,7 +61,7 @@ Unfavorite a island.
 > param {IslandCode} islandId 
 
 ### Arguments
-- islandId
+- `islandId`
 
 ## getCreativeHistory(olderThan)
 Get creative history.
@@ -66,14 +70,14 @@ Get creative history.
 > param {Date} olderThan ISO 8601 Date
 
 ### Arguments
-- olderThan - ISO 8601 Date
+- `olderThan` - ISO 8601 Date
 
 ## inMatch(numberOfPlayers, secondsUntilChange)
 Appear as your in a game.
 
 ### Arguments
-- numberOfPlayers
-- secondsUntilChange
+- `numberOfPlayers`
+- `secondsUntilChange`
 
 ## outMatch()
 Get out of a match state.
@@ -96,7 +100,7 @@ Stats V2.
 > returns {Object} Parsed stats.
 
 ### Arguments
-- account - Account id or displayName.
+- `account` - Account id or displayName.
 
 ## grantAccess()
 Grant access. (Client already has access.)
@@ -143,7 +147,7 @@ Optout of leaderboard.
 > returns {Object} Updated settings.
 
 ### Arguments
-- optout - If you want to optout of leaderboards.
+- `optout` - If you want to optout of leaderboards.
 
 ## makeClient(data)
 Makes a new client, and places it into clients object.
@@ -154,7 +158,7 @@ Makes a new client, and places it into clients object.
 > returns {new this} New client.
 
 ### Arguments
-- data - Config for the client.
+- `data` - Config for the client.
 
 ## lastPresences()
 Last presences from friends.
@@ -189,8 +193,8 @@ Sets a alias for a friend.
  true it went good.
 
 ### Arguments
-- account - A friend.
-- alias - Any alias that is up to 16 letters and 3 letters.
+- `account` - A friend.
+- `alias` - Any alias that is up to 16 letters and 3 letters.
 
 ## setNote(account, note)
 Sets a note for a friend.
@@ -207,8 +211,8 @@ Sets a note for a friend.
  true it went good.
 
 ### Arguments
-- account - A friend.
-- note - A note you want to set.
+- `account` - A friend.
+- `note` - A note you want to set.
 
 ## removeNote(account)
 Removes the note from a friend.
@@ -223,7 +227,7 @@ Removes the note from a friend.
  true it went good.
 
 ### Arguments
-- account - A friend.
+- `account` - A friend.
 
 ## removeAlias(account)
 Removes a alias from a friend.
@@ -238,4 +242,4 @@ Removes a alias from a friend.
  true it went good.
 
 ### Arguments
-- account - A friend.
+- `account` - A friend.

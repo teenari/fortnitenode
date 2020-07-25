@@ -1,10 +1,25 @@
 # Party
-This class has 29 functions!
+Page is automated, contact me if theres something wrong.
+This class has 30 functions!
 
 [To use this make sure you read the Usage md.](https://stoplight.io/p/docs/gh/teenari/fortnitenode/docs/Usage.md?srn=gh/teenari/fortnitenode/docs/Usage.md&group=master)
 
 ## Properties
-*Due to some bugs using my auto docs, I have to tell you to `console.log` this class or look at the file, thank you for your understanding.*
+- fortnite
+- launcher
+- Request
+- created_at
+- updated_at
+- applicants
+- id
+- members
+- members
+- config
+- meta
+- invites
+- revision
+- hub - Class `Hub`
+*Class uses a set config function, to set properties.* (`setConfig`)
 
 ## Methods
 
@@ -18,7 +33,7 @@ Remove a object/string/anything from the meta.
 > param {String} metaRemoved Thing to remove.
 
 ### Arguments
-- metaRemoved - Thing to remove.
+- `metaRemoved` - Thing to remove.
 
 ## set(data)
 Set something in the meta.
@@ -27,7 +42,7 @@ Set something in the meta.
 > param {Object} metaChange Data of what you want to change.
 
 ### Arguments
-- data
+- `data`
 
 ## check()
 Check if something is missing in meta.
@@ -51,13 +66,13 @@ if(this.captain.id !== this.launcher.account.id) this.launcher.debugger.error('P
 }
 
 ### Arguments
-- PlaylistData
+- `PlaylistData`
 
 ## setPrivacySettings(PrivacySettings)
-No information about this function, contact me to update function `setPrivacySettings`.
+No comments on this function, contact me to update function `setPrivacySettings`'s comments on the library.
 
 ### Arguments
-- PrivacySettings
+- `PrivacySettings`
 
 ## setCustomKey(key)
 Change the custom match key.
@@ -66,7 +81,7 @@ Change the custom match key.
 > param {String} key A custom key.
 
 ### Arguments
-- key - A custom key.
+- `key` - A custom key.
 
 ## setPrivacy(privacyEnum)
 Set privacy in party.
@@ -75,7 +90,7 @@ Set privacy in party.
 > param {Object} privacyEnum A privacy enum.
 
 ### Arguments
-- privacyEnum - A privacy enum.
+- `privacyEnum` - A privacy enum.
 
 ## setPlaylist(playlistName, regionId, tournamentId, eventWindowId)
 Set playlist.
@@ -90,10 +105,10 @@ Set playlist.
 > param {String} eventWindowId Event window id.
 
 ### Arguments
-- playlistName - Playlist id.
-- regionId - Region id.
-- tournamentId - Tournament id.
-- eventWindowId - Event window id.
+- `playlistName` - Playlist id.
+- `regionId` - Region id.
+- `tournamentId` - Tournament id.
+- `eventWindowId` - Event window id.
 
 ## findMember(id)
 Find a member.
@@ -102,7 +117,7 @@ Find a member.
 > param {String} id Member's account id.
 
 ### Arguments
-- id - Member's account id.
+- `id` - Member's account id.
 
 ## kick(member)
 Kick a member from the party.
@@ -111,7 +126,7 @@ Kick a member from the party.
 > param {String} member Account id of member.
 
 ### Arguments
-- member - Account id of member.
+- `member` - Account id of member.
 
 ## promote(member)
 Promote a member.
@@ -120,7 +135,7 @@ Promote a member.
 > param {String} member Account id of member.
 
 ### Arguments
-- member - Account id of member.
+- `member` - Account id of member.
 
 ## invite(user)
 Invite a friend to your party.
@@ -129,7 +144,7 @@ Invite a friend to your party.
 > param {String} user A friend's account id.
 
 ### Arguments
-- user - A friend's account id.
+- `user` - A friend's account id.
 
 ## changeSpot(member, assignment)
 Change somone's spot in the party.
@@ -140,8 +155,8 @@ Change somone's spot in the party.
 > param {Number} assignment Spot in the party.
 
 ### Arguments
-- member - Member's account id.
-- assignment - Spot in the party.
+- `member` - Member's account id.
+- `assignment` - Spot in the party.
 
 ## patchMember(update, deleted)
 Same as the member patch but this is a function for the party.
@@ -152,8 +167,8 @@ Same as the member patch but this is a function for the party.
 > param {Object} deleted Deleted.
 
 ### Arguments
-- update - Updated.
-- deleted - Deleted.
+- `update` - Updated.
+- `deleted` - Deleted.
 
 ## join(id)
 Join a party.
@@ -162,7 +177,7 @@ Join a party.
 > param {String} id A party id.
 
 ### Arguments
-- id - A party id.
+- `id` - A party id.
 
 ## leave(createParty)
 Leave the current party.
@@ -171,7 +186,7 @@ Leave the current party.
 > param {Boolean} createParty Create party after leaving.
 
 ### Arguments
-- createParty - Create party after leaving.
+- `createParty` - Create party after leaving.
 
 ## confirm(member)
 -- Member confirmation --
@@ -182,7 +197,7 @@ Confirm a user's join.
 > param {String} member A member's id.
 
 ### Arguments
-- member - A member's id.
+- `member` - A member's id.
 
 ## reject(member)
 -- Member confirmation --
@@ -193,7 +208,7 @@ Reject a user's join.
 > param {String} member A member's id.
 
 ### Arguments
-- member - A member's id.
+- `member` - A member's id.
 
 ## setConfig(config)
 Set the whole party's class.
@@ -202,7 +217,7 @@ Set the whole party's class.
 > param {Object} config A party object.
 
 ### Arguments
-- config - A party object.
+- `config` - A party object.
 
 ## setAssignments()
 Set assignments in party.
@@ -218,33 +233,40 @@ Patch party's meta.
 > param {Boolean} dnf If update assignments.
 
 ### Arguments
-- updated - Updated.
-- deleted - Deleted.
-- dnf - If update assignments.
+- `updated` - Updated.
+- `deleted` - Deleted.
+- `dnf` - If update assignments.
 
 ## getPing(user)
-No information about this function, contact me to update function `getPing`.
+No comments on this function, contact me to update function `getPing`'s comments on the library.
 
 ### Arguments
-- user
+- `user`
 
 ## deletePing(user)
-No information about this function, contact me to update function `deletePing`.
+No comments on this function, contact me to update function `deletePing`'s comments on the library.
 
 ### Arguments
-- user
+- `user`
 
 ## getParty(id)
-No information about this function, contact me to update function `getParty`.
+No comments on this function, contact me to update function `getParty`'s comments on the library.
 
 ### Arguments
-- id
+- `id`
 
 ## getUser(id)
-No information about this function, contact me to update function `getUser`.
+No comments on this function, contact me to update function `getUser`'s comments on the library.
 
 ### Arguments
-- id
+- `id`
+
+## deleteInvite(partyId, pinger_id)
+No comments on this function, contact me to update function `deleteInvite`'s comments on the library.
+
+### Arguments
+- `partyId`
+- `pinger_id`
 
 ## create(data)
 Create a party.
@@ -253,7 +275,7 @@ Create a party.
 > param {Object} data Party.
 
 ### Arguments
-- data - Party.
+- `data` - Party.
 
 ## sendPartyPresence(status)
 Send a party presence.
@@ -262,7 +284,7 @@ Send a party presence.
 > param {String} status Custom status.
 
 ### Arguments
-- status - Custom status.
+- `status` - Custom status.
 
 ## get(defname, ifGameItem, place)
 Get something from the meta.
@@ -273,6 +295,6 @@ Get something from the meta.
 > param {Boolean} isGameItem If the thing your trying to get is a item.
 
 ### Arguments
-- defname
-- ifGameItem
-- place
+- `defname`
+- `ifGameItem`
+- `place`

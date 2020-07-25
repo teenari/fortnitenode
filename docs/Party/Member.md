@@ -1,10 +1,20 @@
 # Member
+Page is automated, contact me if theres something wrong.
 This class has 37 functions!
 
 [To use this make sure you read the Usage md.](https://stoplight.io/p/docs/gh/teenari/fortnitenode/docs/Usage.md?srn=gh/teenari/fortnitenode/docs/Usage.md&group=master)
 
 ## Properties
-*Due to some bugs using my auto docs, I have to tell you to `console.log` this class or look at the file, thank you for your understanding.*
+- fortnite
+- launcher
+- meta
+- id
+- connections
+- revision
+- role
+- updated_at
+- joined_at
+*Class uses a set config function, to set properties.* (`setConfig`)
 
 ## Methods
 
@@ -17,8 +27,8 @@ Get something from the meta.
 > param {Boolean} isGameItem If the thing your trying to get is a item.
 
 ### Arguments
-- name - Name of thing you want to get.
-- isGameItem - If the thing your trying to get is a item.
+- `name` - Name of thing you want to get.
+- `isGameItem` - If the thing your trying to get is a item.
 
 ## makeMemberMeta()
 Makes a member meta for you.
@@ -39,7 +49,7 @@ Set the whole member's class.
 > param {Object} data A member object.
 
 ### Arguments
-- data - A member object.
+- `data` - A member object.
 
 ## changeSpot(assignment)
 Set spot of member.
@@ -48,7 +58,7 @@ Set spot of member.
 > param {Number} assignment Assignment/Spot.
 
 ### Arguments
-- assignment - Assignment/Spot.
+- `assignment` - Assignment/Spot.
 
 ## check()
 Check if something is missing in meta.
@@ -60,7 +70,7 @@ Set something in the meta.
 > param {Object} metaChange Data of what you want to change.
 
 ### Arguments
-- metaChange - Data of what you want to change.
+- `metaChange` - Data of what you want to change.
 
 ## remove(metaRemoved)
 Remove a object/string/anything from the meta.
@@ -69,7 +79,7 @@ Remove a object/string/anything from the meta.
 > param {String} metaRemoved Thing to remove.
 
 ### Arguments
-- metaRemoved - Thing to remove.
+- `metaRemoved` - Thing to remove.
 
 ## setAthenaCosmeticLoadout(Loadout)
 Remove a object/string/anything from the meta.
@@ -114,74 +124,74 @@ return true;
 }
 
 ### Arguments
-- Loadout
+- `Loadout`
 
 ## setAthenaBannerInfo(BannerInfo)
-No information about this function, contact me to update function `setAthenaBannerInfo`.
+No comments on this function, contact me to update function `setAthenaBannerInfo`'s comments on the library.
 
 ### Arguments
-- BannerInfo
+- `BannerInfo`
 
 ## setFrontendEmote(FrontendEmote)
-No information about this function, contact me to update function `setFrontendEmote`.
+No comments on this function, contact me to update function `setFrontendEmote`'s comments on the library.
 
 ### Arguments
-- FrontendEmote
+- `FrontendEmote`
 
 ## setAssistedChallengeInfo(AssistedChallengeInfo)
-No information about this function, contact me to update function `setAssistedChallengeInfo`.
+No comments on this function, contact me to update function `setAssistedChallengeInfo`'s comments on the library.
 
 ### Arguments
-- AssistedChallengeInfo
+- `AssistedChallengeInfo`
 
 ## setMemberSquadAssignmentRequest(MemberSquadAssignmentRequest)
-No information about this function, contact me to update function `setMemberSquadAssignmentRequest`.
+No comments on this function, contact me to update function `setMemberSquadAssignmentRequest`'s comments on the library.
 
 ### Arguments
-- MemberSquadAssignmentRequest
+- `MemberSquadAssignmentRequest`
 
 ## setVoiceChatStatus(VoiceChatStatus)
-No information about this function, contact me to update function `setVoiceChatStatus`.
+No comments on this function, contact me to update function `setVoiceChatStatus`'s comments on the library.
 
 ### Arguments
-- VoiceChatStatus
+- `VoiceChatStatus`
 
 ## setUtcTimeStartedMatchAthena(UtcTimeStartedMatchAthena)
-No information about this function, contact me to update function `setUtcTimeStartedMatchAthena`.
+No comments on this function, contact me to update function `setUtcTimeStartedMatchAthena`'s comments on the library.
 
 ### Arguments
-- UtcTimeStartedMatchAthena
+- `UtcTimeStartedMatchAthena`
 
 ## setReadyInputType(ReadyInputType)
-No information about this function, contact me to update function `setReadyInputType`.
+No comments on this function, contact me to update function `setReadyInputType`'s comments on the library.
 
 ### Arguments
-- ReadyInputType
+- `ReadyInputType`
 
 ## setCurrentInputType(CurrentInputType)
-No information about this function, contact me to update function `setCurrentInputType`.
+No comments on this function, contact me to update function `setCurrentInputType`'s comments on the library.
 
 ### Arguments
-- CurrentInputType
+- `CurrentInputType`
 
 ## setCampaignHero(CampaignHero_j)
-No information about this function, contact me to update function `setCampaignHero`.
+No comments on this function, contact me to update function `setCampaignHero`'s comments on the library.
 
 ### Arguments
-- CampaignHero_j
+- `CampaignHero_j`
 
 ## setBattlePassInfo(BattlePassInfo_j)
-No information about this function, contact me to update function `setBattlePassInfo`.
+No comments on this function, contact me to update function `setBattlePassInfo`'s comments on the library.
 
 ### Arguments
-- BattlePassInfo_j
+- `BattlePassInfo_j`
 
 ## setPlatform_j(Platform_j, extraData)
-No information about this function, contact me to update function `setPlatform_j`.
+No comments on this function, contact me to update function `setPlatform_j`'s comments on the library.
 
 ### Arguments
-- Platform_j
-- extraData
+- `Platform_j`
+- `extraData`
 
 ## setReadiness(GameReadiness_s)
 Set the member's readiness.
@@ -190,7 +200,7 @@ Set the member's readiness.
 > param {String} GameReadiness_s Readiness.
 
 ### Arguments
-- GameReadiness_s - Readiness.
+- `GameReadiness_s` - Readiness.
 
 ## setPlatform(platform)
 Set platform.
@@ -199,7 +209,7 @@ Set platform.
 > param {String} platform Platform.
 
 ### Arguments
-- platform - Platform.
+- `platform` - Platform.
 
 ## setHero(Hero)
 Set campaign hero.
@@ -208,7 +218,7 @@ Set campaign hero.
 > param {String} Hero Hero id.
 
 ### Arguments
-- Hero - Hero id.
+- `Hero` - Hero id.
 
 ## setBanner(bannerIconId= this.parsedMeta.AthenaBannerInfo_j.AthenaBannerInfo.bannerIconId, bannerColorId= this.parsedMeta.AthenaBannerInfo_j.AthenaBannerInfo.bannerColorId, seasonLevel= this.fortnite.mcp.level)
 Set banner!
@@ -221,9 +231,9 @@ Set banner!
 > param {} seasonLevel Season level.
 
 ### Arguments
-- bannerIconId= this.parsedMeta.AthenaBannerInfo_j.AthenaBannerInfo.bannerIconId
-- bannerColorId= this.parsedMeta.AthenaBannerInfo_j.AthenaBannerInfo.bannerColorId
-- seasonLevel= this.fortnite.mcp.level
+- `bannerIconId= this.parsedMeta.AthenaBannerInfo_j.AthenaBannerInfo.bannerIconId`
+- `bannerColorId= this.parsedMeta.AthenaBannerInfo_j.AthenaBannerInfo.bannerColorId`
+- `seasonLevel= this.fortnite.mcp.level`
 
 ## setBattlePass(bHasPurchasedPass= this.fortnite.mcp.battlepassPurchased, passLevel= this.fortnite.mcp.level)
 Set your battlepass.
@@ -238,8 +248,8 @@ Set your battlepass.
 > param {} friendBoostXp Friend xp boost.
 
 ### Arguments
-- bHasPurchasedPass= this.fortnite.mcp.battlepassPurchased
-- passLevel= this.fortnite.mcp.level
+- `bHasPurchasedPass= this.fortnite.mcp.battlepassPurchased`
+- `passLevel= this.fortnite.mcp.level`
 
 ## setCharacter(CID)
 Set character.
@@ -248,7 +258,7 @@ Set character.
 > param {String} CID Character id.
 
 ### Arguments
-- CID - Character id.
+- `CID` - Character id.
 
 ## setBackpack(BID)
 Set backpack.
@@ -257,7 +267,7 @@ Set backpack.
 > param {String} BID Backpack id.
 
 ### Arguments
-- BID - Backpack id.
+- `BID` - Backpack id.
 
 ## setPet(BID)
 Set Pet.
@@ -266,7 +276,7 @@ Set Pet.
 > param {String} BID Pet id.
 
 ### Arguments
-- BID - Pet id.
+- `BID` - Pet id.
 
 ## setPickaxe(PID)
 Set pickaxe.
@@ -275,7 +285,7 @@ Set pickaxe.
 > param {String} PID Pickaxe id.
 
 ### Arguments
-- PID - Pickaxe id.
+- `PID` - Pickaxe id.
 
 ## setContrail(TID)
 Set contrail.
@@ -284,7 +294,7 @@ Set contrail.
 > param {String} TID Contrail id.
 
 ### Arguments
-- TID - Contrail id.
+- `TID` - Contrail id.
 
 ## setEmote(EID)
 Set emote.
@@ -293,7 +303,7 @@ Set emote.
 > param {String} EID Emote id.
 
 ### Arguments
-- EID - Emote id.
+- `EID` - Emote id.
 
 ## clearEmote()
 Clears emote.
@@ -305,7 +315,7 @@ Set emoji.
 > param {String} Emoji Emoji id.
 
 ### Arguments
-- Emoji - Emoji id.
+- `Emoji` - Emoji id.
 
 ## setEnlightenment(t, v)
 Set enlightenment.
@@ -316,8 +326,8 @@ Set enlightenment.
 > param {Number} v Level.
 
 ### Arguments
-- t - Season number.
-- v - Level.
+- `t` - Season number.
+- `v` - Level.
 
 ## setVariant(item, channel, variant)
 Set variants.
@@ -330,9 +340,9 @@ Set variants.
 > param {String} variant 
 
 ### Arguments
-- item - 
-- channel - 
-- variant
+- `item` - 
+- `channel` - 
+- `variant`
 
 ## patch(updated, deleted)
 Patch the member's meta.
@@ -343,5 +353,5 @@ Patch the member's meta.
 > param {Array} deleted Deleted values.
 
 ### Arguments
-- updated - Updated.
-- deleted - Deleted values.
+- `updated` - Updated.
+- `deleted` - Deleted values.

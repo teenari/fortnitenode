@@ -1,10 +1,16 @@
 # GraphQL
+Page is automated, contact me if theres something wrong.
 This class has 14 functions!
 
 [To use this make sure you read the Usage md.](https://stoplight.io/p/docs/gh/teenari/fortnitenode/docs/Usage.md?srn=gh/teenari/fortnitenode/docs/Usage.md&group=master)
 
 ## Properties
-*Due to some bugs using my auto docs, I have to tell you to `console.log` this class or look at the file, thank you for your understanding.*
+- fortnite
+- launcher
+- fortnite
+- launcher
+- Request - Class `Request`
+- Authorization
 
 ## Methods
 
@@ -27,7 +33,7 @@ Multiple users.
 > param {Array} accountIds Array of user ids.
 
 ### Arguments
-- accountIds - Array of user ids.
+- `accountIds` - Array of user ids.
 
 ## getUser(displayName)
 User.
@@ -36,37 +42,25 @@ User.
 > param {Array} displayName DisplayName.
 
 ### Arguments
-- displayName - DisplayName.
-
-## setAlias(friendId, alias)
-Set alias of friend.
-
-### Comments
-> param friendId The friend's id.
-
-> param alias The alias you want to set.
-
-### Arguments
-- friendId - The friend's id.
-- alias - The alias you want to set.
+- `displayName` - DisplayName.
 
 ## getSummary(displayNames=true)
 Summary of account.
 
 ### Arguments
-- displayNames=true
+- `displayNames=true`
 
 ## getFriends()
-No information about this function, contact me to update function `getFriends`.
+No comments on this function, contact me to update function `getFriends`'s comments on the library.
 
 ## getIncoming()
-No information about this function, contact me to update function `getIncoming`.
+No comments on this function, contact me to update function `getIncoming`'s comments on the library.
 
 ## getBlocklist()
-No information about this function, contact me to update function `getBlocklist`.
+No comments on this function, contact me to update function `getBlocklist`'s comments on the library.
 
 ## getOutgoing()
-No information about this function, contact me to update function `getOutgoing`.
+No comments on this function, contact me to update function `getOutgoing`'s comments on the library.
 
 ## getPresenceV2Online(namespace= "Fortnite", circle="friends")
 Presence V2 online summary.
@@ -77,8 +71,20 @@ Presence V2 online summary.
 > param {} circle Circle (Ex. friends)
 
 ### Arguments
-- namespace= "Fortnite"
-- circle="friends"
+- `namespace= "Fortnite"`
+- `circle="friends"`
 
 ## getExternalAuths()
 External auths for account.
+
+## setAlias(friendId, alias)
+Set alias of friend.
+
+### Comments
+> param friendId The friend's id.
+
+> param alias The alias you want to set.
+
+### Arguments
+- `friendId` - The friend's id.
+- `alias` - The alias you want to set.

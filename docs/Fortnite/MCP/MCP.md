@@ -1,10 +1,14 @@
 # MCP
+Page is automated, contact me if theres something wrong.
 This class has 4 functions!
 
 [To use this make sure you read the Usage md.](https://stoplight.io/p/docs/gh/teenari/fortnitenode/docs/Usage.md?srn=gh/teenari/fortnitenode/docs/Usage.md&group=master)
 
 ## Properties
-*Due to some bugs using my auto docs, I have to tell you to `console.log` this class or look at the file, thank you for your understanding.*
+- fortnite
+- launcher
+- profiles - Object
+- items
 
 ## Methods
 
@@ -18,7 +22,7 @@ Adds a profile to the profiles object.
 > param {String} profileId A profileId to add.
 
 ### Arguments
-- profileId - A profileId to add.
+- `profileId` - A profileId to add.
 
 ## gather()
 Gathers everything such as athena, common_core, common_public.
@@ -38,7 +42,7 @@ Posts a mcp (Thanks to mix (https://github.com/MixV2/EpicResearch#13-mcp))
 > returns {Object} Updated profile.
 
 ### Arguments
-- command - Command to use in request. (Example: QueryProfile)
-- profileId - ProfileId. (Example: athena)
-- rvn - How much times has the user changed their profile.
-- body - A extra part for anybody that wants to post their own payload.
+- `command` - Command to use in request. (Example: QueryProfile)
+- `profileId` - ProfileId. (Example: athena)
+- `rvn` - How much times has the user changed their profile.
+- `body` - A extra part for anybody that wants to post their own payload.

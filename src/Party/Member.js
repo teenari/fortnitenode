@@ -3,10 +3,10 @@ const Platforms = require('fortnitenode/enums/Platforms');
 
 class Member {
   constructor(fortnite, data) {
-        this.fortnite = fortnite;
-        this.launcher = this.fortnite.launcher;
+    this.fortnite = fortnite;
+    this.launcher = this.fortnite.launcher;
 
-        this.setConfig(data);
+    this.setConfig(data);
   }
 
   /**
@@ -23,17 +23,17 @@ class Member {
    * @returns {Object} Member meta.
    */
   makeMemberMeta() {
-    const Character = this.fortnite.mcp.locker.Character ? this.fortnite.mcp.locker.Character.items[0].split(":")[1] : 'CID_568_Athena_Commando_M_RebirthSoldier';
-    const Backpack = this.fortnite.mcp.locker.Backpack ? this.fortnite.mcp.locker.Backpack.items[0].split(":")[1] : 'bid_435_constellation';
-    const Pickaxe = this.fortnite.mcp.locker.Pickaxe ? this.fortnite.mcp.locker.Pickaxe.items[0].split(":")[1] : 'Dev_Test_Pickaxe';
-    const Contrail = this.fortnite.mcp.locker.SkyDiveContrail ? this.fortnite.mcp.locker.SkyDiveContrail.items[0].split(":")[1] : 'Trails_ID_084_Briefcase';
+    const Character = this.fortnite.mcp.locker ? this.fortnite.mcp.locker.Character ? this.fortnite.mcp.locker.Character.items[0].split(":")[1] : 'CID_568_Athena_Commando_M_RebirthSoldier' : 'CID_568_Athena_Commando_M_RebirthSoldier';
+    const Backpack = this.fortnite.mcp.locker ? this.fortnite.mcp.locker.Backpack ? this.fortnite.mcp.locker.Backpack.items[0].split(":")[1] : 'bid_435_constellation' : 'bid_435_constellation';
+    const Pickaxe = this.fortnite.mcp.locker ? this.fortnite.mcp.locker.Pickaxe ? this.fortnite.mcp.locker.Pickaxe.items[0].split(":")[1] : 'Dev_Test_Pickaxe' : 'Dev_Test_Pickaxe';
+    const Contrail = this.fortnite.mcp.locker ? this.fortnite.mcp.locker.SkyDiveContrail ? this.fortnite.mcp.locker.SkyDiveContrail.items[0].split(":")[1] : 'Trails_ID_084_Briefcase' : 'Trails_ID_084_Briefcase'
 
     const Locker = this.fortnite.mcp.items.CosmeticLocker.find(Locker => Locker.attributes.locker_name === "" && Locker.attributes.banner_icon_template !== "");
 
     const bannerIconId = Locker ? Locker.attributes.banner_icon_template : "";
     const bannerColorId = Locker ? Locker.attributes.banner_color_template : "";
 
-    const Platform = this.launcher.data.settings.platform;
+    const Platform = this.launcher.config.settings.platform;
 
     return {
         AssistedChallengeInfo_j: JSON.stringify({
@@ -443,7 +443,6 @@ class Member {
     });
   }
 
-
   /**
    * Set Pet.
    * @param {String} BID Pet id.
@@ -583,10 +582,10 @@ class Member {
           false,
           null,
           true,
-      )
+      );
       return true;
     } catch(error) {
-      this.launcher.debugger.error(error.code);
+      this.launcher.debugger.error(error);
     }
   }
 
@@ -626,7 +625,7 @@ class Member {
       )
       return true;
     } catch(error) {
-      this.launcher.debugger.error(error.code);
+      this.launcher.debugger.error(error);
     }
   }
 

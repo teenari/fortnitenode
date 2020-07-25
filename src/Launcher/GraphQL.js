@@ -162,32 +162,6 @@ class GraphQL {
     }
 
     /**
-     * Set alias of friend.
-     * @param friendId The friend's id.
-     * @param alias The alias you want to set.
-     */
-    async setAlias(friendId, alias) {
-        const { data: { data: { Friends: { setAlias: { success } } } } } = await this.Request.sendRequest(
-            `${Endpoints.KAIROS}/graphql`,
-            "POST",
-            this.launcher.Authorization.fullToken,
-            {
-                query: `mutation FriendsMutation($friendId: String!, $alias: String!) { Friends { setAlias(friendId: $friendId, alias: $alias) { success } } }`,
-                variables: {
-                    friendId,
-                    alias
-                }
-            },
-            false,
-            {
-                "Content-Type": "application/json",
-            },
-            true
-        );
-        return success;
-    }
-
-    /**
      * Summary of account.
      */
     async getSummary(displayNames=true) {
@@ -274,6 +248,32 @@ class GraphQL {
             true
         );
         return externalAuths;
+    }
+
+    /**
+     * Set alias of friend.
+     * @param friendId The friend's id.
+     * @param alias The alias you want to set.
+     */
+    async setAlias(friendId, alias) {
+        const { data: { data: { Friends: { setAlias: { success } } } } } = await this.Request.sendRequest(
+            `${Endpoints.KAIROS}/graphql`,
+            "POST",
+            this.launcher.Authorization.fullToken,
+            {
+                query: `mutation FriendsMutation($friendId: String!, $alias: String!) { Friends { setAlias(friendId: $friendId, alias: $alias) { success } } }`,
+                variables: {
+                    friendId,
+                    alias
+                }
+            },
+            false,
+            {
+                "Content-Type": "application/json",
+            },
+            true
+        );
+        return success;
     }
 
 }

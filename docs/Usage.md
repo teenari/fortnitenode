@@ -48,20 +48,18 @@ Just replace the settings string with..
 Replace platform with your platform!
 ### Moving onto the other properties.
 
-The property **credentials** is optional for **Broswer Login**.
-Heres some of the values you can set.
+For the main part, logging in, you need to provide a way to login.
+Here's a example using exchange code.
 
-```json
-{
-  "exchangeCode": "",
-  "deviceAuth": {
-    "device_id": "",
-    "account_id": "",
-    "secret": ""
-  },
-  "email": "",
-  "password": ""
-}
+```js
+/* Other code from above */
+const fortnite = new Fortnite({
+  settings: 'DEFAULT',
+  oauth: {
+    exchange_code: 'code'
+  }
+});
 ```
 
-Now use one of the methods in [Login Methods](https://stoplight.io/p/docs/gh/teenari/fortnitenode/docs/LoginMethods.md?srn=gh/teenari/fortnitenode/docs/LoginMethods.md&group=master).
+The grant_type is already gotten from a repo by mix#1044.
+[These are all oauth grant types, click on one of them and see the things you have to provide.](https://github.com/MixV2/EpicResearch/tree/master/docs/auth/grant_types)

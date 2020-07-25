@@ -55,9 +55,9 @@ class Party {
             PrimaryGameSessionId_s: "",
             PrivacySettings_j: JSON.stringify({
                 PrivacySettings: {
-                    partyType: this.launcher.data.settings.config.partyType,
-                    partyInviteRestriction: this.launcher.data.settings.config.inviteRestriction,
-                    bOnlyLeaderFriendsCanJoin: this.launcher.data.settings.config.onlyLeaderFriendsCanJoin,
+                    partyType: this.launcher.config.settings.config.partyType,
+                    partyInviteRestriction: this.launcher.config.settings.config.inviteRestriction,
+                    bOnlyLeaderFriendsCanJoin: this.launcher.config.settings.config.onlyLeaderFriendsCanJoin,
                 }
             }),
             RawSquadAssignments_j: JSON.stringify({
@@ -238,7 +238,7 @@ class Party {
         try {
             const meta = {
                 "urn:epic:cfg:build-id_s": "1:1:",
-                "urn:epic:conn:platform_s": this.launcher.data.settings.platform.plat,
+                "urn:epic:conn:platform_s": this.launcher.config.settings.platform.plat,
                 "urn:epic:conn:type_s": "game",
                 "urn:epic:invite:platformdata_s": "",
                 "urn:epic:member:dn_s": this.launcher.account.displayName,
@@ -264,7 +264,7 @@ class Party {
             });
             return response.statusCode === 204;
         } catch(error) {
-            this.launcher.debugger.error(error.code);
+            this.launcher.debugger.error(error);
         }
     }
 
@@ -305,7 +305,7 @@ class Party {
                     connection: {
                         id: this.fortnite.stream.stanza.jid,
                         meta: {
-                            "urn:epic:conn:platform_s": this.launcher.data.settings.platform.plat,
+                            "urn:epic:conn:platform_s": this.launcher.config.settings.platform.plat,
                             "urn:epic:conn:type_s": "game",
                         },
                         "yield_leadership": false,
@@ -316,7 +316,7 @@ class Party {
                             "users": [{
                                 "id": this.launcher.account.id,
                                 "dn": this.launcher.account.displayName,
-                                "plat": this.launcher.data.settings.platform.plat,
+                                "plat": this.launcher.config.settings.platform.plat,
                                 "data": JSON.stringify({
                                     "CrossplayPreference": "1",
                                     "SubGame_u": "1",
@@ -335,7 +335,7 @@ class Party {
             await this.fortnite.stream.makeMUC(`Party-${this.fortnite.party.id}@muc.prod.ol.epicgames.com`);
             return this.fortnite.party;
         } catch(error) {
-            this.launcher.debugger.error(error.code);
+            this.launcher.debugger.error(error);
         }
     }
 
@@ -355,14 +355,14 @@ class Party {
                         connection: {
                             id: this.fortnite.stream.stanza.jid,
                             meta: {
-                                "urn:epic:conn:platform_s": this.launcher.data.settings.platform.plat,
+                                "urn:epic:conn:platform_s": this.launcher.config.settings.platform.plat,
                                 "urn:epic:conn:type_s": "game",
                             },
                         },
                         meta: {
                             "urn:epic:member:dn_s": this.launcher.account.displayName,
                             "urn:epic:member:type_s": "game",
-                            "urn:epic:member:platform_s": this.launcher.data.settings.platform.plat,
+                            "urn:epic:member:platform_s": this.launcher.config.settings.platform.plat,
                             "urn:epic:member:joinrequest_j": JSON.stringify({
                                 "CrossplayPreference_i":"1"
                             }),
@@ -376,7 +376,7 @@ class Party {
             if (createParty === true) return await this.create();
             return true;
         } catch(error) {
-            this.launcher.debugger.error(error.code);
+            this.launcher.debugger.error(error);
         }
     }
 
@@ -398,7 +398,7 @@ class Party {
             )
             return response.statusCode === 204;
         } catch(error) {
-            this.launcher.debugger.error(error.code);
+            this.launcher.debugger.error(error);
         }
     }
 
@@ -420,7 +420,7 @@ class Party {
             )
             return response.statusCode === 204;
         } catch(error) {
-            this.launcher.debugger.error(error.code);
+            this.launcher.debugger.error(error);
         }
     }
 
@@ -515,7 +515,7 @@ class Party {
             await this.sendPartyPresence();
             return true;
         } catch(error) {
-            this.launcher.debugger.error(error.code);
+            this.launcher.debugger.error(error);
         }
     }
 
@@ -535,7 +535,7 @@ class Party {
             if(error.code === 'errors.com.epicgames.social.party.ping_not_found') {
                 return false;
             }
-            this.launcher.debugger.error(error.code);
+            this.launcher.debugger.error(error);
         }
     }
 
@@ -555,7 +555,7 @@ class Party {
             if(error.code === 'errors.com.epicgames.social.party.ping_not_found') {
                 return false;
             }
-            this.launcher.debugger.error(error.code);
+            this.launcher.debugger.error(error);
         }
     }
 
@@ -572,7 +572,7 @@ class Party {
             );
             return data;
         } catch(error) {
-            this.launcher.debugger.error(error.code);
+            this.launcher.debugger.error(error);
         }
     }
 
@@ -589,7 +589,7 @@ class Party {
             );
             return data;
         } catch(error) {
-            this.launcher.debugger.error(error.code);
+            this.launcher.debugger.error(error);
         }
     }
 
@@ -607,7 +607,7 @@ class Party {
             );
             return data;
         } catch(error) {
-            this.launcher.debugger.error(error.code);
+            this.launcher.debugger.error(error);
         }
     }
 
@@ -624,8 +624,25 @@ class Party {
                 true,
             );
             return data;
-        }catch(error) {
-            this.launcher.debugger.error(error.code);
+        } catch(error) {
+            this.launcher.debugger.error(error);
+        }
+    }
+
+    async deleteInvite(partyId, pinger_id) {
+        try {
+            const { response } = await this.Request.sendRequest(
+                `${Endpoints.PARTY}/v1/Fortnite/parties/${partyId}/invites/${pinger_id}`,
+                "DELETE",
+                this.fortnite.Authorization.fullToken,
+                null,
+                false,
+                null,
+                true,
+            );
+            return response.statusCode === 204 || response.statusCode === 200;
+        } catch(error) {
+            this.launcher.debugger.error(error);
         }
     }
 
@@ -638,26 +655,26 @@ class Party {
             this.launcher.debugger.debug(`Party`, `Creating party, data ${data ? 'provided' : 'not provided'}.`);
             const party = data || {
                 meta: {
-                    "urn:epic:cfg:accepting-members_b": this.launcher.data.settings.config.acceptingMembers,
+                    "urn:epic:cfg:accepting-members_b": this.launcher.config.settings.config.acceptingMembers,
                     "urn:epic:cfg:build-id_s": "1:1:",
-                    "urn:epic:cfg:chat-enabled_b": this.launcher.data.settings.chatEnabled,
-                    "urn:epic:cfg:invite-perm_s": this.launcher.data.settings.config.invitePermission,
-                    "urn:epic:cfg:join-request-action_s": this.launcher.data.settings.joinConfirmation === false ? "AutoApprove" : "Manual",
+                    "urn:epic:cfg:chat-enabled_b": this.launcher.config.settings.chatEnabled,
+                    "urn:epic:cfg:invite-perm_s": this.launcher.config.settings.config.invitePermission,
+                    "urn:epic:cfg:join-request-action_s": this.launcher.config.settings.joinConfirmation === false ? "AutoApprove" : "Manual",
                     "urn:epic:cfg:can-join_b": "true",
-                    "urn:epic:cfg:party-type-id_s": this.launcher.data.settings.type,
+                    "urn:epic:cfg:party-type-id_s": this.launcher.config.settings.type,
                     "urn:epic:cfg:not-accepting-members-reason_i": '0',
-                    "urn:epic:cfg:presence-perm_s": this.launcher.data.settings.config.presencePermission,
+                    "urn:epic:cfg:presence-perm_s": this.launcher.config.settings.config.presencePermission,
                 },
                 members: [],
                 config: {
                     discoverability: "ALL",
-                    invite_ttl: this.launcher.data.settings.inviteTTL,
-                    join_confirmation: this.launcher.data.settings.joinConfirmation,
-                    joinabilifty: this.launcher.data.settings.joinability,
-                    max_size: this.launcher.data.settings.maxSize,
-                    sub_type: this.launcher.data.settings.subType,
-                    type: this.launcher.data.settings.type,
-                    chatEnabled: this.launcher.data.settings.chatEnabled,
+                    invite_ttl: this.launcher.config.settings.inviteTTL,
+                    join_confirmation: this.launcher.config.settings.joinConfirmation,
+                    joinabilifty: this.launcher.config.settings.joinability,
+                    max_size: this.launcher.config.settings.maxSize,
+                    sub_type: this.launcher.config.settings.subType,
+                    type: this.launcher.config.settings.type,
+                    chatEnabled: this.launcher.config.settings.chatEnabled,
                 },
             };
             const UserData = await this.getUser();
@@ -693,7 +710,7 @@ class Party {
 
             return true;
         } catch(error) {
-            this.launcher.debugger.error(error.code);
+            this.launcher.debugger.error(error);
         }
     }
 
@@ -706,7 +723,7 @@ class Party {
         if (this.config.joinability == "OPEN") {
             data.sourceId = this.launcher.account.id;
             data.sourceDisplayName = this.launcher.account.displayName;
-            data.sourcePlatform = this.launcher.data.settings.platform.plat;
+            data.sourcePlatform = this.launcher.config.settings.platform.plat;
             data.partyId = this.id;
             data.partyTypeId = 286331153;
             data.key = "k";

@@ -146,7 +146,7 @@ class Stream extends EventEmitter {
                 setInterval(() => {
                     this.setPresence(this.currentStatus);
                 }, 60 * 1000);
-                resolve(this.stanza);
+                resolve(true);
             });
             this.events();
             this.stanza.connect();
@@ -193,7 +193,6 @@ class Stream extends EventEmitter {
                 const body = JSON.parse(presence.status);
                 this.emit(`status`, body);
                 this.emit(`status#${presence.from.split("@")[0]}`, body);
-                console.log(new Status(body));
                 this.emit("eventHandler", {
                     ...body,
                     type: 'status',
@@ -547,13 +546,8 @@ class Stream extends EventEmitter {
                             });
                         } break;
 
-                        case 'com.epicgames.friends.core.apiobjects.Friend': {
-                            await this.launcher.setAccount();
-                        } break;
-
-                        default:
-                            console.log(body);
-                            break;
+                        // default:
+                        // break;
 
                     }
                 }

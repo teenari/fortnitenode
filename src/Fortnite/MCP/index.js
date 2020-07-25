@@ -54,9 +54,6 @@ class MCP {
             common_core: await this.addProfile("common_core"),
             common_public: await this.addProfile("common_public")
         };
-        if(this.launcher.data.profileIds && Array.isArray(this.launcher.data.profileIds)) {
-            await this.addProfile(this.launcher.data.profileIds);
-        }
         this.sort();
         return this;
     }
@@ -84,7 +81,7 @@ class MCP {
             )
             return data;
         } catch(error) {
-            this.launcher.debugger.error('Launcher', error.code);
+            this.launcher.debugger.error('Launcher', error);
         }
     }
 

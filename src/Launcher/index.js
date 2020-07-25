@@ -6,21 +6,19 @@ const Friend = require("fortnitenode/src/Launcher/Friend");
 const Platforms = require("fortnitenode/enums/Platforms");
 const Privacy = require("fortnitenode/enums/PrivacySettings");
 const fs = require('fs');
-const CryptoJS = require("crypto-js");
 const Debug = require("../Debug");
 const { v4: uuid } = require('uuid');
 
 class Launcher {
     /**
      * Constructor of **Launcher**.
-     * @param {Object} data A config for the client, which can be edited.
+     * @param {Object} config A config for the client, which can be edited.
      */
-    constructor(data) {
-        this.data = {
-            credentials: null,
-            profileIds: [],
+    constructor(config) {
+        this.config = {
+            oauth: null,
             debugger: console.log,
-            ...data,
+            ...config,
             settings: {
                 config: Privacy.Public,
                 joinConfirmation: false,
@@ -31,241 +29,17 @@ class Launcher {
                 inviteTTL: 14400,
                 chatEnabled: true,
                 platform: Platforms.WINDOWS,
-                ...data.settings
-            },
-        };
-        if(typeof this.data.settings.platform === 'string') this.data.settings.platform = Platforms[this.data.settings.platform] || Platforms.WINDOWS;
-        if(typeof this.data.settings.config === 'string') this.data.settings.config = Privacy[this.data.settings.platform] || Privacy.Public;
-        if(this.data.credentials.deviceAuth) {
-            if(this.data.credentials.deviceAuth.key) {
-                const keys = Object.keys(this.data.credentials.deviceAuth).filter(key => key !== 'key');
-                for (const key of keys) {
-                    if(this.data.credentials.deviceAuth.encrypter) this.data.credentials.deviceAuth[key] = this.data.credentials.deviceAuth.encrypter(this.data.credentials.deviceAuth[key], this.data.credentials.deviceAuth.key);
-                    else this.data.credentials.deviceAuth[key] = CryptoJS.AES.decrypt(this.data.credentials.deviceAuth[key], this.data.credentials.deviceAuth.key).toString(CryptoJS.enc.Utf8);
-                }
+                ...config.settings
             }
-        }
+        };
 
         this.stream = null;
 
         this.Request = new Request(this);
         this.Authorization = null;
         this.killedToken = false;
-        this.debugger = new Debug(this.data.custom_message, this.data.debugger);
+        this.debugger = new Debug(this.config.custom_message, this.config.debugger);
         this.graphql = new GraphQL(this);
-        this.browser = null;
-    }
-
-    /**
-     * Logins in.
-     * @returns {Boolean} True or false.
-     */
-    async login() {
-        const reputation = await this.reputation();
-
-        this.messages = await this.geti18nMessages();
-
-        const XSRF = await this.newXSRFToken();
-        if(!XSRF) this.debugger.error('Launcher', 'Cannot get `XSRF`!');
-
-        if (this.data.credentials.deviceAuth) {
-            const data = await this.oauthWithDevice(this.data.credentials.deviceAuth);
-
-            this.debugger.debug('Launcher', 'Logging in with `device`.');
-            if(!data) this.debugger.error('Launcher', 'Login not successful since `device` is not vaild.');
-            this.setAuth(data);
-        } else if(this.data.credentials.exchangeCode) {
-            const data = await this.ouath(this.data.credentials.exchangeCode);
-            this.debugger.debug('Launcher', 'Logging in with `exchangeCode`.');
-            if(!data) this.debugger.error('Launcher', `Cannot get eg1!`);
-            this.setAuth(data);
-        } else {
-            if(reputation.verdict !== 'allow' && !this.data.credentials.captcha) this.debugger.error('Launcher', 'Please use something like fnn-captcha to get a captcha token.');
-            if(reputation.verdict === 'allow') this.data.credentials.captcha = null;
-            await this.sendLoginRequest(XSRF, this.data.credentials);
-            this.debugger.debug('Launcher', '`exchangeCode` is being gotten.');
-            const exchangeCode = await this.getExchangeCode(XSRF);
-            const data = await this.ouath(exchangeCode);
-            if(!data) this.debugger.error('Launcher', 'Logging in was a unsuccess.');
-            this.setAuth(data);
-        }
-        await this.setAccount();
-
-        this.debugger.debug('Launcher', this.messages['authorize.success.prompt1'].split('<')[0]);
-        if(this.data.settings.deleteDevices == true) await this.deleteDeviceAuths();
-        this.stream = new Stream(this, {
-            type: "Launcher",
-            resource: `V2:Launcher:${this.data.settings.platform.plat}::${uuid().replace(/-/g, "").toUpperCase()}`,
-            prod: 'prod.ol.epicgames.com',
-            service: 'xmpp-service-prod.ol.epicgames.com',
-            credentials: {
-                username: this.account.id,
-                password: this.Authorization.access_token
-            },
-        });
-        await this.stream.stream();
-        return true;
-    }
-
-    /**
-     * Logout of the launcher or any type.
-     * @param {String} token A access token to kill. (NOT NEEDED)
-     */
-    async logout(token) {
-        try {
-            await this.Request.sendRequest(
-                `${Endpoints.KILLTOKEN}/${token || this.Authorization.access_token}`,
-                "DELETE",
-                token ? `bearer ${token}` : this.Authorization.fullToken,
-                null,
-                false,
-                null,
-                false,
-            )
-            if(!token) {
-                this.killedToken = true;
-                this.stream.disconnect();
-            }
-            return true;
-        } catch(error) {
-            this.debugger.error('Launcher', error.code);
-        }
-    }
-
-    /**
-     * Messages for the epic games site.
-     */
-    async geti18nMessages() {
-        try {
-            const { data } = await this.Request.sendRequest(
-                `${Endpoints.FRONT}/api/i18n?ns=messages&lang=en-US`,
-                "GET"
-            )
-            return data;
-        } catch(error) {
-            this.debugger.error('Launcher', error.code);
-        }
-    }
-
-    /**
-     * Checks a eula.
-     * @param {String} namespace A namespace.
-     * @returns {Boolean} Will return boolean if eula is accepted, and a object if it's not. Use **receiveEULA(object)**, to accept the eula.
-     */
-    async informEULA(namespace) {
-        try {
-            const { data } = await this.Request.sendRequest(
-                `${Endpoints.EULA}/agreements/${namespace}/account/${this.account.id}?locale=en-EN`,
-                "GET",
-                this.Authorization.fullToken,
-                null,
-                null,
-                null,
-                true,
-              );
-              return data ? data : true;
-        } catch(error) {
-            this.debugger.error('Launcher', error.code);
-        }
-    }
-
-    /**
-     * Acceptes eula.
-     * @param {Object} elua Is from **informEULA(namespace)**.
-     * @returns {Boolean} true.
-     */
-    async receiveEULA(elua) {
-        try {
-            await this.Request.sendRequest(
-                `${Endpoints.EULA}/agreements/${elua.key}/version/${elua.version}/account/${this.account.id}/accept?locale=${elua.locale}`,
-                "POST",
-                this.Authorization.fullToken,
-                null,
-                null,
-                null,
-                true
-            );
-            return true;
-        } catch(error) {
-            this.debugger.error('Launcher', error.code);
-        }
-    }
-
-    /**
-     * @returns {Array} Array of entitlements.
-     */
-    async getEntitlements() {
-        try {
-            const { data } = await this.Request.sendRequest(
-                `https://entitlement-public-service-prod08.ol.epicgames.com/entitlement/api/account/${this.account.id}/entitlements?count=4000`,
-                "GET",
-                this.Authorization.fullToken,
-                null,
-                false,
-                {
-                  'Content-Type': "application/json;charset=UTF-8",  
-                },
-                true,
-            )
-
-            return data;
-        }
-        catch(error) {
-            this.debugger.error('Launcher', error.code);
-        }
-    }
-
-    /**
-     * Purchase a item.
-     * @param {String} offerId Offer id of game.
-     * @param {String} namespace Namespace of game.
-     */
-    async purchase(offerId, namespace) {
-        this.debugger.error('Launcher', `Because I removed puppeteer, I have no way of buying games.`);
-    }
-
-    /**
-     * Sets Auth.
-     * @param {Object} Authorization Object of auth from ouathing. 
-     * @returns {Boolean} true.
-     */
-    setAuth(Authorization) {
-        this.Authorization = {
-            fullToken: `${Authorization.token_type} ${Authorization.access_token}`,
-            ...Authorization,
-        };
-        return true;
-    }
-
-    /**
-     * Checks if a user is added.
-     * @param {String} friendAdded A friend.
-     * @returns {Boolean} true or false.
-     */
-    async isAdded(friendAdded) {
-        const friends = await this.getFriends();
-        friendAdded = await this.getAccount(friendAdded);
-        return typeof friends.find(friend => friend.accountId == friendAdded) === "object";
-    }
-
-    /**
-     * @returns {Object} Array of objects of people blocked.
-     */
-    async getBlockList() {
-        try {
-            const { data } = await this.Request.sendRequest(
-                `${Endpoints.FRIENDS}/v1/${this.account.id}/blocklist`,
-                "GET",
-                this.Authorization.fullToken,
-                null,
-                null,
-                null,
-                true,
-            )
-            return data;
-        } catch(error) {
-            this.debugger.error('Launcher', error.code);
-        }
     }
 
     /**
@@ -286,73 +60,174 @@ class Launcher {
             )
             return response.statusCode === 204;
         } catch(error) {
-            this.debugger.error('Launcher', error.code);
+            this.debugger.error('Launcher', error);
         }
     }
 
     /**
-     * Unblock a user.
-     * @param {String} blocked Blocked user.
-     * @returns {Boolean} True, means the user has been unblocked, false means the user hasn't been unblocked.
+     * Changes friend settings.
+     * @param {Boolean} setting True or false. (Accept invites.)
+     * @returns {Object} Response.
      */
-    async unblock(blocked) {
+    async changeFriendSettings(setting) {
+        if(!this.Authorization) return;
+        const { data } = await this.Request.sendRequest(
+            `${Endpoints.FRIENDS}/v1/${this.account.id}/settings`,
+            "PUT",
+            this.Authorization.fullToken,
+            {
+                acceptInvites: setting,
+            },
+            false,
+            {
+                "Content-Type": "application/json;charset=UTF-8",
+            },
+            true,
+        )
+        return data;
+    }
+
+    /**
+     * Deletes device auth.
+     * @param {Object} data Device auth object.
+     * @returns {Boolean} True or false.
+     */
+    async deleteDeviceAuth(device_id) {
         try {
-            const { response } = await this.Request.sendRequest(
-                `${Endpoints.FRIENDS}/v1/${this.account.id}/blocklist/${blocked}`,
+            const iosAuth = await this.getIosInfo();
+            await this.Request.sendRequest(
+                `${Endpoints.ACCOUNTPUCPROD}/account/${this.account.id}/deviceAuth/${device_id}`,
                 "DELETE",
+                `${iosAuth.token_type} ${iosAuth.access_token}`,
+                null,
+                null,
+                null,
+                true,
+            )
+            return true;
+        } catch(error) {
+            this.debugger.error('Launcher', error);
+        }
+    }
+
+    /**
+     * Deletes all device auths.
+     * @param {String} notToken Device id. (Doesn't delete)
+     * @returns {Boolean} True or false.
+     */
+    async deleteDeviceAuths(notToken) {
+        try {
+            const deviceAuths = await this.getDeviceAuths();
+            var index;
+            for (index = 0; index < deviceAuths.length; index++) { 
+                const device = deviceAuths[index];
+                if(this.config.oauth.device_id) {
+                    if(this.config.oauth.device_id == device.deviceId) continue;
+                }
+                if(notToken == device.deviceId) continue;
+                await this.deleteDeviceAuth(device.deviceId);
+            } 
+            return true;
+        } catch(error) {
+            this.debugger.error('Launcher', error);
+        }
+    }
+
+    /**
+     * Friends a user.
+     * @param {String} account Account.
+     * @returns {Boolean} True or false.
+     */
+    async friend(account) {
+        if(this.isAdded(account) === true) this.debugger.error('Launcher', "You cannot friend a user that your already friended with!");
+        try {
+            await this.Request.sendRequest(
+                `${Endpoints.FRIENDSERVICE}/public/friends/${this.account.id}/${account}`,
+                "POST",
                 this.Authorization.fullToken,
+                null,
                 null,
                 null,
                 null,
                 false,
             )
-            return response.statusCode === 204;
+            await this.setAccount();
+            return true;
         } catch(error) {
-            this.debugger.error('Launcher', error.code);
+            this.debugger.error('Launcher', error);
         }
     }
 
     /**
-     * @returns {String} XSRF TOKEN
+     * Messages for the epic games site.
      */
-    async newXSRFToken() {
+    async geti18nMessages() {
         try {
-            const { response } = await this.Request.sendRequest(
-                `${Endpoints.FRONT}/api/csrf`,
+            const { data } = await this.Request.sendRequest(
+                `${Endpoints.FRONT}/api/i18n?ns=messages&lang=en-US`,
+                "GET"
+            )
+            return data;
+        } catch(error) {
+            this.debugger.error('Launcher', error);
+        }
+    }
+
+    /**
+     * Find a slug.
+     * @param {String} slug A slug/support a creator code.
+     */
+    async getSlug(slug) {
+        try {
+            const { data } = await this.Request.sendRequest(
+                `${Endpoints.PAYMENTPCI}/affiliate/search-by-slug?slug=${slug}`,
+                "GET"
+            )
+            return data;
+        } catch(error) {
+            this.debugger.error('Launcher', error);
+        }
+    }
+
+    /**
+     * @returns {Array} Array of entitlements.
+     */
+    async getEntitlements() {
+        try {
+            const { data } = await this.Request.sendRequest(
+                `${Endpoints.ENTITLEMENT}/${this.account.id}/entitlements?count=4000`,
                 "GET",
-            );
-            return response.headers["set-cookie"][0].split("XSRF-TOKEN=")[1].split(";")[0];
-        } catch(error) {
-            this.debugger.error('Launcher', error.code);
-        }
-    }
-
-    /**
-     * Sends login request.
-     * @param {String} XSRF XSRF Token
-     * @param {Object} credentials Object of email and password.
-     * @returns {Boolean} true or false.
-     */
-    async sendLoginRequest(XSRF, credentials) {
-        try {
-            await this.Request.sendRequest(
-                `${Endpoints.FRONT}/api/login`,
-                "POST",
+                this.Authorization.fullToken,
                 null,
+                false,
                 {
-                    email: credentials.email,
-                    password: credentials.password,
-                    captcha: credentials.captcha ? await credentials.captcha() : '',
-                    rememberMe: false
+                  'Content-Type': "application/json;charset=UTF-8",  
                 },
                 true,
-                {
-                    "X-XSRF-TOKEN": XSRF,
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                true
-            );
-            return true;
+            )
+
+            return data;
+        }
+        catch(error) {
+            this.debugger.error('Launcher', error);
+        }
+    }
+    
+    /**
+     * @returns {Object} Array of objects of people blocked.
+     */
+    async getBlockList() {
+        try {
+            const { data } = await this.Request.sendRequest(
+                `${Endpoints.FRIENDS}/v1/${this.account.id}/blocklist`,
+                "GET",
+                this.Authorization.fullToken,
+                null,
+                null,
+                null,
+                true,
+            )
+            return data;
         } catch(error) {
             this.debugger.error('Launcher', error);
         }
@@ -375,7 +250,7 @@ class Launcher {
             )
             return data.code;
         } catch(error) {
-            this.debugger.error('Launcher', error.code);
+            this.debugger.error('Launcher', error);
         }
     }
 
@@ -387,8 +262,8 @@ class Launcher {
     async getExchangeCode(XSRF) {
         try {
             const { data } = await this.Request.sendRequest(
-                `${Endpoints.FRONT}/api/exchange`,
-                "GET",
+                `${Endpoints.FRONT}/api/exchange/generate`,
+                "POST",
                 null,
                 false,
                 false,
@@ -399,7 +274,7 @@ class Launcher {
             );
             return data.code;
         } catch(error) {
-            this.debugger.error('Launcher', error.code);
+            this.debugger.error('Launcher', error);
         }
     }
 
@@ -422,7 +297,7 @@ class Launcher {
             if(!response || !response.data) return null;
             return response.data;
         } catch(error) {
-            this.debugger.error('Launcher', error.code);
+            this.debugger.error('Launcher', error);
         }
     }
 
@@ -454,38 +329,10 @@ class Launcher {
             if(!response || !response.data) return;
             return response.data;
         } catch(error) {
-            this.debugger.error('Launcher', error.code);
+            this.debugger.error('Launcher', error);
         }
     }
-
-    /**
-     * Oauths.
-     * @param {String} exchangeCode Exchange code.
-     * @param {String} AuthToken Auth token.
-     * @returns {Object} Auth.
-     */
-    async ouath(exchangeCode, AuthToken) {
-        try {
-            const { data } = await this.Request.sendRequest(
-                `${Endpoints.ACCOUNTSERVICE}/oauth/token`,
-                "POST",
-                `basic ${AuthToken || "MzRhMDJjZjhmNDQxNGUyOWIxNTkyMTg3NmRhMzZmOWE6ZGFhZmJjY2M3Mzc3NDUwMzlkZmZlNTNkOTRmYzc2Y2Y="}`,
-                {
-                    grant_type: "exchange_code",
-                    exchange_code: exchangeCode,
-                },
-                true,
-                {
-                    "Content-Type" : "application/x-www-form-urlencoded"
-                },
-                true,
-            );
-            return data;
-        } catch(error) {
-            this.debugger.error('Launcher', error.code);
-        }
-    }
-
+    
     /**
      * Generate device auth.
      * @returns {Object} Object of device.
@@ -506,90 +353,10 @@ class Launcher {
             )
             return data;
         } catch(error) {
-            this.debugger.error('Launcher', error.code);
+            this.debugger.error('Launcher', error);
         }
     }
-
-    /**
-     * Oauth with device.
-     * @param {Object} data From **generateDeviceAuth**.
-     * @returns {Object} Auth.
-     */
-    async oauthWithDevice(data) {
-        try {
-            var device_id;
-            var account_id;
-            var secret;
-            if(data.device_id.includes("=")) {
-                device_id = CryptoJS.AES.decrypt(data.device_id, 'device_id').toString(CryptoJS.enc.Utf8);
-                account_id = CryptoJS.AES.decrypt(data.account_id, 'account_id').toString(CryptoJS.enc.Utf8);
-                secret = CryptoJS.AES.decrypt(data.secret, 'secret').toString(CryptoJS.enc.Utf8);
-            }
-
-            const { data: Auth } = await this.Request.sendRequest(
-                `${Endpoints.ACCOUNTSERVICE}/oauth/token`,
-                "POST",
-                `basic MzQ0NmNkNzI2OTRjNGE0NDg1ZDgxYjc3YWRiYjIxNDE6OTIwOWQ0YTVlMjVhNDU3ZmI5YjA3NDg5ZDMxM2I0MWE=`,
-                {
-                    grant_type: "device_auth",
-                    device_id: device_id || data.device_id,
-                    account_id: account_id || data.account_id,
-                    secret: secret || data.secret,
-                },
-                true,
-                {
-                    "Content-Type" : "application/x-www-form-urlencoded"
-                },
-                true,
-            );
-            const exchangeCode = await this.getExchangeOauth(`${Auth.token_type} ${Auth.access_token}`);
-            const auth = await this.ouath(exchangeCode);
-            return auth;
-        } catch(error) {
-            this.debugger.error('Launcher', error.code);
-        }
-    }
-
-    /**
-     * @returns {Object} Reputation.
-     */
-    async reputation() {
-        try {
-            const { data } = await this.Request.sendRequest(
-                `${Endpoints.FRONT}/api/reputation`,
-                "GET",
-            );
-            return data;
-        } catch(error) {
-            this.debugger.error('Launcher', error.code);
-        }
-    }
-
-    /**
-     * Sets device auth in file.
-     * @param {File} file File.
-     * @returns {Object} Device auth.
-     */
-    async setDeviceInfo(file, key) {
-        try {
-            var data = await this.generateDeviceAuth();
-            if(!file.includes(".json")) file = `${file}.json`;
-            data = {
-                device_id: CryptoJS.AES.encrypt(data.deviceId, key).toString(),
-                account_id: CryptoJS.AES.encrypt(data.accountId, key).toString(),
-                secret: CryptoJS.AES.encrypt(data.secret, key).toString(),
-            }
-            fs.writeFile(file, JSON.stringify(data, null, 4), function(err) {
-                if(err) {
-                    this.debugger.error('Launcher', err);
-                }
-                return data;
-            }); 
-        } catch(error) {
-            this.debugger.error('Launcher', error.code);
-        }
-    }
-
+    
     /**
      * @returns {Array} Array of objects of device auths.
      */
@@ -607,53 +374,7 @@ class Launcher {
             )
             return data;
         } catch(error) {
-            this.debugger.error('Launcher', error.code);
-        }
-    }
-
-    /**
-     * Deletes device auth.
-     * @param {Object} data Device auth object.
-     * @returns {Boolean} True or false.
-     */
-    async deleteDeviceAuth(device_id) {
-        try {
-            const iosAuth = await this.getIosInfo();
-            await this.Request.sendRequest(
-                `${Endpoints.ACCOUNTPUCPROD}/account/${this.account.id}/deviceAuth/${device_id}`,
-                "DELETE",
-                `${iosAuth.token_type} ${iosAuth.access_token}`,
-                null,
-                null,
-                null,
-                true,
-            )
-            return true;
-        } catch(error) {
-            this.debugger.error('Launcher', error.code);
-        }
-    }
-
-    /**
-     * Deletes all device auths.
-     * @param {String} notToken Device id. (Doesn't delete)
-     * @returns {Boolean} True or false.
-     */
-    async deleteDeviceAuths(notToken) {
-        try {
-            const deviceAuths = await this.getDeviceAuths();
-            var index;
-            for (index = 0; index < deviceAuths.length; index++) { 
-                const device = deviceAuths[index];
-                if(this.data.credentials.deviceAuth) {
-                    if(this.data.credentials.deviceAuth.device_id == device.deviceId) continue;
-                }
-                if(notToken == device.deviceId) continue;
-                await this.deleteDeviceAuth(device.deviceId);
-            } 
-            return true;
-        } catch(error) {
-            this.debugger.error('Launcher', error.code);
+            this.debugger.error('Launcher', error);
         }
     }
 
@@ -676,24 +397,8 @@ class Launcher {
             )
             return data;
         } catch(error) {
-            this.debugger.error('Launcher', error.code);
+            this.debugger.error('Launcher', error);
         }
-    }
-
-    /**
-     * Sends your location at epic so magma can track you.
-     * @returns {Object} Response.
-     */
-    async sendLocation() {
-        return await this.Request.sendRequest(
-            `${Endpoints.FRONT}/api/location`,
-            "POST",
-            null,
-            null,
-            null,
-            null,
-            null,
-        );
     }
 
     /**
@@ -708,29 +413,6 @@ class Launcher {
             null,
             null,
             null,
-            true,
-        )
-        return data;
-    }
-
-    /**
-     * Changes friend settings.
-     * @param {Boolean} setting True or false. (Accept invites.)
-     * @returns {Object} Response.
-     */
-    async changeFriendSettings(setting) {
-        if(!this.Authorization) return;
-        const { data } = await this.Request.sendRequest(
-            `${Endpoints.FRIENDS}/v1/${this.account.id}/settings`,
-            "PUT",
-            this.Authorization.fullToken,
-            {
-                acceptInvites: setting,
-            },
-            false,
-            {
-                "Content-Type": "application/json;charset=UTF-8",
-            },
             true,
         )
         return data;
@@ -790,7 +472,7 @@ class Launcher {
             }
             return array;
         } catch(error) {
-            this.debugger.error('Launcher', error.code);
+            this.debugger.error('Launcher', error);
         }
     }
 
@@ -803,56 +485,6 @@ class Launcher {
         const friendrequests = [];
         for (const request of requests) friendrequests.push(new Friend.Request({ ...request }));
         return friendrequests;
-    }
-
-    /**
-     * Friends a user.
-     * @param {String} account Account.
-     * @returns {Boolean} True or false.
-     */
-    async friend(account) {
-        if(this.isAdded(account) === true) this.debugger.error('Launcher', "You cannot friend a user that your already friended with!");
-        try {
-            await this.Request.sendRequest(
-                `${Endpoints.FRIENDSERVICE}/public/friends/${this.account.id}/${account}`,
-                "POST",
-                this.Authorization.fullToken,
-                null,
-                null,
-                null,
-                null,
-                false,
-            )
-            await this.setAccount();
-            return true;
-        } catch(error) {
-            this.debugger.error('Launcher', error.code);
-        }
-    }
-
-    /**
-     * Unfriend a friend.
-     * @param {String} friend Friend.
-     * @returns {Boolean} True or false.
-     */
-    async unfriend(friend) {
-        if(await this.isAdded(friend) === false) this.debugger.error('Launcher', "Cannot unfriend a user that is not friended.");
-        try {
-            const { response } = await this.Request.sendRequest(
-                `${Endpoints.FRIENDSERVICE}/public/friends/${this.account.id}/${account}`,
-                "DELETE",
-                this.Authorization.fullToken,
-                null,
-                null,
-                null,
-                null,
-                false,
-            );
-            await this.setAccount();
-            return response.statusCode == 204;
-        } catch(error) {
-            this.debugger.error('Launcher', error.code);
-        }
     }
 
     /**
@@ -908,7 +540,7 @@ class Launcher {
             }
             return false;
         } catch(error) {
-            this.debugger.error('Launcher', error.code);
+            this.debugger.error('Launcher', error);
         }
     }
 
@@ -922,11 +554,11 @@ class Launcher {
             const ios_token = "MzQ0NmNkNzI2OTRjNGE0NDg1ZDgxYjc3YWRiYjIxNDE6OTIwOWQ0YTVlMjVhNDU3ZmI5YjA3NDg5ZDMxM2I0MWE="
 
             if(!exchangeCode) exchangeCode = await this.getExchangeOauth();
-            const auth = await this.ouath(exchangeCode, ios_token);
+            const auth = await this.oauth({ grant_type: 'exchange_code', exchange_code: exchangeCode }, ios_token, true);
 
             return auth;
         } catch(error) {
-            this.debugger.error('Launcher', error.code);
+            this.debugger.error('Launcher', error);
         }
     }
 
@@ -946,26 +578,285 @@ class Launcher {
         )
         return data;
     }
-
+    
     /**
-     * Wipes client's friends list.
-     * @returns {Boolean} True or false.
+     * Checks a eula.
+     * @param {String} namespace A namespace.
+     * @returns {Boolean} Will return boolean if eula is accepted, and a object if it's not. Use **receiveEULA(object)**, to accept the eula.
      */
-    async wipeFriendList() {
+    async informEULA(namespace) {
         try {
-            const { response } = await this.Request.sendRequest(
-                `${Endpoints.FRIENDSERVICE}/public/friends/${this.account.id}`,
-                "DELETE",
+            const { data } = await this.Request.sendRequest(
+                `${Endpoints.EULA}/agreements/${namespace}/account/${this.account.id}?locale=en-EN`,
+                "GET",
                 this.Authorization.fullToken,
                 null,
                 null,
                 null,
+                true,
+              );
+              return data ? data : false;
+        } catch(error) {
+            console.log(error);
+            this.debugger.error('Launcher', error);
+        }
+    }
+
+    /**
+     * Checks if a user is added.
+     * @param {String} friendAdded A friend.
+     * @returns {Boolean} true or false.
+     */
+    async isAdded(friendAdded) {
+        const friends = await this.getFriends();
+        friendAdded = await this.getAccount(friendAdded);
+        return typeof friends.find(friend => friend.accountId == friendAdded) === "object";
+    }
+
+    /**
+     * Logins in.
+     * @returns {Boolean} True or false.
+     */
+    async login() {
+        const reputation = await this.reputation();
+
+        this.messages = await this.geti18nMessages();
+        if(this.config.oauth && !this.config.oauth.grant_type) {
+            const ouaths = (await this.Request.sendRequest(
+                `https://api.github.com/repos/MixV2/EpicResearch/contents/docs/auth/grant_types`,
+                "GET",
+                null,
+                null,
+                null,
+                {
+                    'User-Agent': 'User'
+                },
+                true
+            )).data.filter(file => !file.name.includes('password'));
+            const keys = Object.keys(this.config.oauth).filter(t => t !== 'basic_token');
+            for (var ouath of ouaths) {
+                ouath.content = (await this.Request.sendRequest(
+                    ouath.download_url,
+                    "GET",
+                    null,
+                    null,
+                    null,
+                    {
+                        'User-Agent': 'User'
+                    },
+                    true
+                )).data;
+                for (const key of keys) if(ouath.content.split(`\`${key}\`: `)[1]) {
+                    this.config.oauth.grant_type = ouath.name.split('.md')[0];
+                }
+            }
+        }
+
+        const XSRF = await this.newXSRFToken();
+        if(!XSRF) this.debugger.error('Launcher', 'Cannot get `XSRF`!');
+
+        if(this.config.oauth.email && this.config.oauth.password) {
+            if(reputation.verdict !== 'allow' && !this.config.oauth.captcha) this.debugger.error('Launcher', 'Please use something to complete a captcha to login.');
+            if(reputation.verdict === 'allow') this.config.oauth.captcha = null;
+            await this.sendLoginRequest(XSRF, this.config.oauth);
+            this.debugger.debug('Launcher', '`exchangeCode` is being gotten.');
+            const exchangeCode = await this.getExchangeCode(XSRF);
+            const data = await this.oauth({ exchange_code: exchangeCode, grant_type: 'exchange_code' }, null, true);
+            if(!data) this.debugger.error('Launcher', 'Logging in was a unsuccess.');
+            this.setAuth(data);
+        }
+        else this.setAuth(await this.oauth(this.config.oauth));
+        await this.setAccount();
+
+        this.debugger.debug('Launcher', this.messages['authorize.success.prompt1'].split('<')[0]);
+        this.stream = new Stream(this, {
+            type: "Launcher",
+            resource: `V2:Launcher:WIN::${uuid().replace(/-/g, "").toUpperCase()}`,
+            prod: 'prod.ol.epicgames.com',
+            service: 'xmpp-service-prod.ol.epicgames.com',
+            credentials: {
+                username: this.account.id,
+                password: this.Authorization.access_token
+            },
+        });
+        return await this.stream.stream();
+    }
+
+    /**
+     * Logout of the launcher or any type.
+     * @param {String} token A access token to kill. (NOT NEEDED)
+     */
+    async logout(token) {
+        try {
+            await this.Request.sendRequest(
+                `${Endpoints.KILLTOKEN}/${token || this.Authorization.access_token}`,
+                "DELETE",
+                token ? `bearer ${token}` : this.Authorization.fullToken,
+                null,
+                false,
+                null,
                 false,
             )
-            return response.statusCode === 204;
+            if(!token) {
+                this.killedToken = true;
+                this.stream.disconnect();
+            }
+            return true;
         } catch(error) {
-            this.debugger.error('Launcher', error.code);
+            this.debugger.error('Launcher', error);
         }
+    }
+    
+    /**
+     * @returns {String} XSRF TOKEN
+     */
+    async newXSRFToken() {
+        try {
+            const { response } = await this.Request.sendRequest(
+                `${Endpoints.FRONT}/api/csrf`,
+                "GET",
+            );
+            return response.headers["set-cookie"][0].split("XSRF-TOKEN=")[1].split(";")[0];
+        } catch(error) {
+            this.debugger.error('Launcher', error);
+        }
+    }
+    
+    /**
+     * Oauths.
+     * @param {String} AuthToken Auth token.
+     * @returns {Object} Auth.
+     */
+    async oauth(body, AuthToken, noExchange) {
+        try {
+            if(body.basic_token) {
+                AuthToken = body.basic_token;
+                delete body.basic_token;
+            }
+            var { data } = await this.Request.sendRequest(
+                `${Endpoints.ACCOUNTSERVICE}/oauth/token`,
+                "POST",
+                `basic ${AuthToken || "MzRhMDJjZjhmNDQxNGUyOWIxNTkyMTg3NmRhMzZmOWE6ZGFhZmJjY2M3Mzc3NDUwMzlkZmZlNTNkOTRmYzc2Y2Y="}`,
+                body,
+                true,
+                {
+                    "Content-Type" : "application/x-www-form-urlencoded"
+                },
+                true,
+            );
+            if(AuthToken && !noExchange && AuthToken !== 'MzRhMDJjZjhmNDQxNGUyOWIxNTkyMTg3NmRhMzZmOWE6ZGFhZmJjY2M3Mzc3NDUwMzlkZmZlNTNkOTRmYzc2Y2Y=') {
+                data = await this.oauth({ grant_type: 'exchange_code', exchange_code: await this.getExchangeOauth(`bearer ${data.access_token}`) }, null, true);
+            }
+            return data;
+        } catch(error) {
+            console.log(error);
+            this.debugger.error('Launcher', error);
+        }
+    }
+
+    /**
+     * Acceptes eula.
+     * @param {Object} elua Is from **informEULA(namespace)**.
+     * @returns {Boolean} true.
+     */
+    async receiveEULA(elua) {
+        try {
+            await this.Request.sendRequest(
+                `${Endpoints.EULA}/agreements/${elua.key}/version/${elua.version}/account/${this.account.id}/accept?locale=${elua.locale}`,
+                "POST",
+                this.Authorization.fullToken,
+                null,
+                null,
+                null,
+                true
+            );
+            return true;
+        } catch(error) {
+            console.log(error);
+            this.debugger.error('Launcher', error);
+        }
+    }
+
+    /**
+     * @returns {Object} Reputation.
+     */
+    async reputation() {
+        try {
+            const { data } = await this.Request.sendRequest(
+                `${Endpoints.FRONT}/api/reputation`,
+                "GET",
+            );
+            return data;
+        } catch(error) {
+            this.debugger.error('Launcher', error);
+        }
+    }
+
+    /**
+     * Sends login request.
+     * @param {String} XSRF XSRF Token
+     * @param {Object} credentials Object of email and password.
+     * @returns {Boolean} true or false.
+     */
+    async sendLoginRequest(XSRF, credentials) {
+        try {
+            await this.Request.sendRequest(
+                `${Endpoints.FRONT}/api/login`,
+                "POST",
+                null,
+                {
+                    email: credentials.email,
+                    password: credentials.password,
+                    captcha: credentials.captcha ? await credentials.captcha() : '',
+                    rememberMe: false
+                },
+                true,
+                {
+                    "X-XSRF-TOKEN": XSRF,
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                true
+            );
+            return true;
+        } catch(error) {
+            this.debugger.error('Launcher', error);
+        }
+    }
+
+    /**
+     * Sets device auth in file.
+     * @param {File} file File.
+     * @returns {Object} Device auth.
+     */
+    async setDeviceInfo(file) {
+        try {
+            var data = await this.generateDeviceAuth();
+            if(!file.includes(".json")) file = `${file}.json`;
+            fs.writeFile(file, JSON.stringify({ device_id: data.deviceId, account_id: data.accountId, secret: data.secret, grant_type: 'device_auth', basic_token: 'MzQ0NmNkNzI2OTRjNGE0NDg1ZDgxYjc3YWRiYjIxNDE6OTIwOWQ0YTVlMjVhNDU3ZmI5YjA3NDg5ZDMxM2I0MWE=' }, null, 4), function(err) {
+                if(err) {
+                    this.debugger.error('Launcher', err);
+                }
+                return data;
+            }); 
+        } catch(error) {
+            this.debugger.error('Launcher', error);
+        }
+    }
+
+    /**
+     * Sends your location at epic so magma can track you.
+     * @returns {Object} Response.
+     */
+    async sendLocation() {
+        return await this.Request.sendRequest(
+            `${Endpoints.FRONT}/api/location`,
+            "POST",
+            null,
+            null,
+            null,
+            null,
+            null,
+        );
     }
 
     /**
@@ -991,6 +882,87 @@ class Launcher {
             coupons: await this.graphql.getCoupons(),
             externalauths: await this.graphql.getExternalAuths(),
             ...this.account,
+        }
+    }
+
+    /**
+     * Sets Auth.
+     * @param {Object} Authorization Object of auth from ouathing. 
+     * @returns {Boolean} true.
+     */
+    setAuth(Authorization) {
+        this.Authorization = {
+            fullToken: `${Authorization.token_type} ${Authorization.access_token}`,
+            ...Authorization,
+        };
+        return true;
+    }
+
+    /**
+     * Unblock a user.
+     * @param {String} blocked Blocked user.
+     * @returns {Boolean} True, means the user has been unblocked, false means the user hasn't been unblocked.
+     */
+    async unblock(blocked) {
+        try {
+            const { response } = await this.Request.sendRequest(
+                `${Endpoints.FRIENDS}/v1/${this.account.id}/blocklist/${blocked}`,
+                "DELETE",
+                this.Authorization.fullToken,
+                null,
+                null,
+                null,
+                false,
+            )
+            return response.statusCode === 204;
+        } catch(error) {
+            this.debugger.error('Launcher', error);
+        }
+    }
+
+    /**
+     * Unfriend a friend.
+     * @param {String} friend Friend.
+     * @returns {Boolean} True or false.
+     */
+    async unfriend(friend) {
+        if(await this.isAdded(friend) === false) this.debugger.error('Launcher', "Cannot unfriend a user that is not friended.");
+        try {
+            const { response } = await this.Request.sendRequest(
+                `${Endpoints.FRIENDSERVICE}/public/friends/${this.account.id}/${account}`,
+                "DELETE",
+                this.Authorization.fullToken,
+                null,
+                null,
+                null,
+                null,
+                false,
+            );
+            await this.setAccount();
+            return response.statusCode == 204;
+        } catch(error) {
+            this.debugger.error('Launcher', error);
+        }
+    }
+
+    /**
+     * Wipes client's friends list.
+     * @returns {Boolean} True or false.
+     */
+    async wipeFriendList() {
+        try {
+            const { response } = await this.Request.sendRequest(
+                `${Endpoints.FRIENDSERVICE}/public/friends/${this.account.id}`,
+                "DELETE",
+                this.Authorization.fullToken,
+                null,
+                null,
+                null,
+                false,
+            )
+            return response.statusCode === 204;
+        } catch(error) {
+            this.debugger.error('Launcher', error);
         }
     }
 

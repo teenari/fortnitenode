@@ -8,7 +8,7 @@ class Request {
 
         this.jar = request.jar();
         this.default = {
-            timeout: 10000,
+            timeout: 5000,
             headers : {},
             jar: this.jar,
             agent: false,
@@ -55,11 +55,11 @@ class Request {
                     }
                     case 'errors.com.epicgames.social.party.stale_revision': break;
                     default: {
-                        console.log(err)
                         throw ({code: err.error.errorCode, error: err, message: err.error.message, statusCode: err.statusCode});
                     }
                 }
             }
+            throw err;
         }
     }
 }
